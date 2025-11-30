@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: musiq_app
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    networks:
+      - musiq
+    depends_on:
+      - db
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=musiq
+      - DB_USERNAME=musiq
+      - DB_PASSWORD=musiq
+
+  composer:
+    image: composer:2
+    container_name: musiq_composer
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    entrypoint: ["composer"]
+
+  nginx:
+    image: nginx:alpine
+    container_name: musiq_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - musiq
+
+  db:
+    image: postgres:16
+    container_name: musiq_db
+    environment:
+      POSTGRES_DB: musiq
+      POSTGRES_USER: musiq
+      POSTGRES_PASSWORD: musiq
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - musiq
+
+networks:
+  musiq:
+
+volumes:
+  db_data:
