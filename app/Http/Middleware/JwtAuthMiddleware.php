@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Domain\Models\Auth\User;
-use App\Infrastructure\Services\Auth\JwtService\JwtServiceInterface;
+use App\Models\Auth\User;
+use App\Service\JwtService\JwtServiceInterface;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;

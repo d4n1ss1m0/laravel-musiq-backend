@@ -2,56 +2,52 @@
 
 namespace App\Service\FileService;
 
-use App\Service\Auth\AccountService;
-use App\Shared\Traits\HttpResponse;
-use FFMpeg\FFMpeg;
-use FFMpeg\Media\Audio;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class FileService
+class FileService implements FileServiceInterface
 {
-    use HttpResponse;
-    public function __construct(private readonly AccountService $accountService)
-    {
-    }
-
-
     public function addFile($file, $path): string
     {
         $fileType = $file->getClientOriginalExtension();
         $hash = Str::uuid()->toString();
-        $path = $file->storeAs($path, "{$hash}.{$fileType}", 'local');
-        return $path;
+        $fileName = "{$hash}.{$fileType}";
+        $path = $file->storeAs($path, $fileName, 'local');
+        return $fileName;
     }
 
-    public function convertMusicFile(string $path): string
+    public function convertMusicFile($path): string
     {
-        $hash = Str::uuid()->toString();
-        $outputFile = storage_path("app/audio/{$hash}.mp3");
+        try {
+            $hash = Str::uuid()->toString();
+            $outputFile = storage_path('app/audio') . '/' . $hash . '.mp3';
+            // Составляем команду FFmpeg
+            //putenv('PATH=/usr/bin:/usr/local/bin:' . getenv('PATH'));
+            $command = sprintf(
+                'ffmpeg -i %s -c:a libmp3lame -b:a 128k -vbr on -ar 48000 %s',
+                escapeshellarg($path),
+                escapeshellarg($outputFile)
+            );
 
-        $command = sprintf(
-            'ffmpeg -i %s -vn -ar 44100 -ac 2 -b:a 192k -codec:a libmp3lame %s 2>&1',
-            escapeshellarg($path),
-            escapeshellarg($outputFile)
-        );
+            // Выполняем команду
+            exec($command, $output, $returnCode);
+            // Проверяем успешность выполнения команды
+            if ($returnCode !== 0) {
+                return response()->json([
+                    'error' => 'Ошибка конвертации файла.',
+                    'output' => $output,
+                ], 500);
+            }
 
-        exec($command, $output, $returnCode);
+            // Удаляем исходный файл (опционально)
+            unlink($path);
 
-        if ($returnCode !== 0) {
-            Log::error('FFmpeg conversion failed', [
-                'command' => $command,
-                'output' => $output
-            ]);
-            throw new \RuntimeException('Ошибка конвертации аудио');
+            return $hash . '.mp3';
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Произошла ошибка при конвертации файла.',
+                'message' => $e->getMessage(),
+            ], 500);
         }
-
-        unlink($path);
-
-        return "audio/{$hash}.mp3";
-    }
-
-    public function deleteFile($path) {
 
     }
 }

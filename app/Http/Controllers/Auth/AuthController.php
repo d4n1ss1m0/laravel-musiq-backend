@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Application\UseCase\Auth\LoginUser\LoginUserInterface;
-use App\Application\UseCase\Auth\RefreshToken\RefreshTokenInterface;
 use App\Http\Controllers\Controller;
+use App\Service\AuthService\AuthServiceInterface;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    public function login(Request $request, LoginUserInterface $loginUseCase)
+    public function login(Request $request, AuthServiceInterface $authService)
     {
-        $data = $loginUseCase->handle($request->login, $request->password);
+        $data = $authService->auth($request->login, $request->password);
         return response()->json($data);
     }
 
-    public function refresh(Request $request, RefreshTokenInterface $refreshUseCase)
+    public function refresh(Request $request, AuthServiceInterface $authService)
     {
-        $data = $refreshUseCase->handle($request->refresh_token);
+        $data = $authService->refresh($request->refresh_token);
         return response()->json($data);
     }
 }

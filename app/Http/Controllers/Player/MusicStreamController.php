@@ -2,23 +2,20 @@
 
 namespace App\Http\Controllers\Player;
 
-use App\Application\DTO\AddTrack\AddTrackDTO;
-use App\Application\DTO\AddTrack\ArtistDTO;
-use App\Application\UseCase\AddTrack\AddTrackByFile\AddTrackByFileInterface;
-use App\Application\UseCase\Auth\LoginUser\LoginUserInterface;
-use App\Application\UseCase\Auth\RefreshToken\RefreshTokenInterface;
-use App\Application\UseCase\Player\MusicStream\MusicStream;
-use App\Application\UseCase\Player\MusicStream\MusicStreamInterface;
+use App\Events\TrackPlayed;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AddTrack\AddTrackByFileRequest;
+use App\Service\MusicStream\MusicStreamServiceInterface;
+use App\Service\Player\PlayerService;
 use App\Shared\Traits\HttpResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class MusicStreamController extends Controller
 {
     use HttpResponse;
-    public function stream(int $id, Request $request, MusicStreamInterface $useCase)
+    public function stream(string $id, Request $request, PlayerService $useCase)
     {
+        $userId = $request->attributes->get('userId');
         if(request()->headers->has('Range')) {
             $range = request()->headers->get('Range');
             $range = preg_replace('/bytes=/', '', $range);
@@ -30,11 +27,14 @@ class MusicStreamController extends Controller
             $start = null;
             $end = null;
         };
+        Log::info("Range {$start}-{$end}");
 
-        [$filePath, $fileSize, $callback, $start, $end] = $useCase->handle($id, $start, $end);
+        [$filePath, $fileSize, $callback, $start, $end] = $useCase->streamData($id, $start, $end);
 //        dd($end);
 //        dd([$filePath, $fileSize, $callback, $start, $end]);
-
+        if ($userId) {
+            event(new TrackPlayed($userId, $id));
+        }
         return $this->musicStream($filePath, $callback, $fileSize, $start, $end);
     }
 }

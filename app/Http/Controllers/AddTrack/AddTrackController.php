@@ -2,20 +2,18 @@
 
 namespace App\Http\Controllers\AddTrack;
 
-use App\Application\DTO\AddTrack\AddTrackDTO;
-use App\Application\DTO\AddTrack\ArtistDTO;
-use App\Application\UseCase\AddTrack\AddTrackByFile\AddTrackByFileInterface;
-use App\Application\UseCase\Auth\LoginUser\LoginUserInterface;
-use App\Application\UseCase\Auth\RefreshToken\RefreshTokenInterface;
+
+use App\DTO\AddTrack\AddTrackDTO;
+use App\DTO\ArtistDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddTrack\AddTrackByFileRequest;
+use App\Service\TrackService\TrackServiceInterface;
 use App\Shared\Traits\HttpResponse;
-use Illuminate\Http\Request;
 
 class AddTrackController extends Controller
 {
     use HttpResponse;
-    public function addTrackByFile(AddTrackByFileRequest $request, AddTrackByFileInterface $useCase)
+    public function addTrackByFile(AddTrackByFileRequest $request, TrackServiceInterface $useCase)
     {
         //TODO: заменить из мидлвейра
         $userId = $request->attributes->get('userId');
@@ -31,7 +29,7 @@ class AddTrackController extends Controller
             $artistArray,
             $request->file('cover'));
 
-        $trackId = $useCase->handle($trackDto, $userId);
+        $trackId = $useCase->addTrackByFile($trackDto, $userId);
 
         return $this->success(['trackId' => $trackId]);
     }

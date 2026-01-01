@@ -2,26 +2,33 @@
 
 namespace App\Providers;
 
-use App\Application\UseCase\AddTrack\AddTrackByFile\AddTrackByFile;
-use App\Application\UseCase\AddTrack\AddTrackByFile\AddTrackByFileInterface;
-use App\Application\UseCase\AddTrack\CreateArtist\AddArtistsToTrack;
-use App\Application\UseCase\AddTrack\CreateArtist\AddArtistsToTrackInterface;
-use App\Application\UseCase\Auth\LoginUser\LoginUser;
-use App\Application\UseCase\Auth\LoginUser\LoginUserInterface;
-use App\Application\UseCase\Auth\RefreshToken\RefreshToken;
-use App\Application\UseCase\Auth\RefreshToken\RefreshTokenInterface;
-use App\Application\UseCase\Player\MusicStream\MusicStream;
-use App\Application\UseCase\Player\MusicStream\MusicStreamInterface;
-use App\Domain\Repositories\Artist\ArtistRepositoryInterface;
-use App\Domain\Repositories\Track\TrackRepositoryInterface;
-use App\Domain\Repositories\User\UserRepositoryInterface;
-use App\Infrastructure\Persistence\Eloquent\Repositories\Artist\ArtistRepository;
-use App\Infrastructure\Persistence\Eloquent\Repositories\Track\TrackRepository;
-use App\Infrastructure\Persistence\Eloquent\Repositories\User\UserRepository;
-use App\Infrastructure\Services\Auth\JwtService\JwtService;
-use App\Infrastructure\Services\Auth\JwtService\JwtServiceInterface;
-use App\Infrastructure\Services\MusicStream\MusicStreamService;
-use App\Infrastructure\Services\MusicStream\MusicStreamServiceInterface;
+
+use App\Repositories\RecentlyPlayedTrack\RecentlyPlayedTrackRepository;
+use App\Repositories\RecentlyPlayedTrack\RecentlyPlayedTrackRepositoryInterface;
+use App\Service\AuthService\AuthService;
+use App\Service\AuthService\AuthServiceInterface;
+use App\Service\FileService\FileService;
+use App\Service\FileService\FileServiceInterface;
+use App\Service\ImageService\ImageService;
+use App\Service\ImageService\ImageServiceInterface;
+use App\Service\JwtService\JwtService;
+use App\Service\JwtService\JwtServiceInterface;
+use App\Service\MainPage\RecentlyAddedTracks\RecentlyAddedTracksService;
+use App\Service\MainPage\RecentlyAddedTracks\RecentlyAddedTracksServiceInterface;
+use App\Service\MainPage\RecentlyPlayedPlaylists\RecentlyPlayedPlaylistsService;
+use App\Service\MainPage\RecentlyPlayedPlaylists\RecentlyPlayedPlaylistsServiceInterface;
+use App\Service\MainPage\RecentlyPlayedTracks\RecentlyPlayedTracksService;
+use App\Service\MainPage\RecentlyPlayedTracks\RecentlyPlayedTracksServiceInterface;
+use App\Service\MusicStream\MusicStreamService;
+use App\Service\MusicStream\MusicStreamServiceInterface;
+use App\Repositories\Artist\ArtistRepository;
+use App\Repositories\Artist\ArtistRepositoryInterface;
+use App\Repositories\Track\TrackRepository;
+use App\Repositories\Track\TrackRepositoryInterface;
+use App\Repositories\User\UserRepository;
+use App\Repositories\User\UserRepositoryInterface;
+use App\Service\TrackService\TrackService;
+use App\Service\TrackService\TrackServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,21 +38,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //UseCase
-        $this->app->bind(RefreshTokenInterface::class, RefreshToken::class);
-        $this->app->bind(LoginUserInterface::class, LoginUser::class);
-        $this->app->bind(AddTrackByFileInterface::class, AddTrackByFile::class);
-        $this->app->bind(AddArtistsToTrackInterface::class, AddArtistsToTrack::class);
-        $this->app->bind(MusicStreamInterface::class, MusicStream::class);
+        //Services
+        $this->app->bind(TrackServiceInterface::class, TrackService::class);
+        $this->app->bind(RecentlyAddedTracksServiceInterface::class, RecentlyAddedTracksService::class);
+        $this->app->bind(RecentlyPlayedPlaylistsServiceInterface::class, RecentlyPlayedPlaylistsService::class);
+        $this->app->bind(RecentlyPlayedTracksServiceInterface::class, RecentlyPlayedTracksService::class);
 
         //Repositories
-        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
-        $this->app->bind(TrackRepositoryInterface::class, TrackRepository::class);
         $this->app->bind(ArtistRepositoryInterface::class, ArtistRepository::class);
+        $this->app->bind(TrackRepositoryInterface::class, TrackRepository::class);
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(RecentlyPlayedTrackRepositoryInterface::class, RecentlyPlayedTrackRepository::class);
 
         //Infrastructure
-        $this->app->bind(JwtServiceInterface::class, JwtService::class);
+        $this->app->bind(ImageServiceInterface::class, ImageService::class);
+        $this->app->bind(AuthServiceInterface::class, AuthService::class);
         $this->app->bind(MusicStreamServiceInterface::class, MusicStreamService::class);
+        $this->app->bind(JwtServiceInterface::class, JwtService::class);
+        $this->app->bind(FileServiceInterface::class, FileService::class);
     }
 
     /**

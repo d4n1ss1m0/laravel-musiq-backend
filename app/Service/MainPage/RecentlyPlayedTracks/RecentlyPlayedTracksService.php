@@ -2,25 +2,21 @@
 
 namespace App\Service\MainPage\RecentlyPlayedTracks;
 
-use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Resources\MainPage\RecentlyPlayedTracksResource;
-use App\Http\Resources\TrackResource;
-use App\Service\Auth\AccountService;
-use Laravel\Sanctum\PersonalAccessToken;
+
+use App\Http\Resources\Tracks\TrackResource;
+use App\Models\Auth\User;
+use App\Service\AuthService\AuthServiceInterface;
 
 class RecentlyPlayedTracksService implements RecentlyPlayedTracksServiceInterface
 {
-    public function __construct(private readonly AccountService $accountService)
-    {
-    }
 
-    public function getRecently() {
-        $user = $this->accountService->getCurrentAccount();
-        $tracksIds = $user->recentlyPlayedTracks()->pluck('tracks.id');
-        $tracks = $user->recentlyPlayedTracks()->limit(10)->with('artists')->get();
+    public function getRecently(int $userId) {
+        $user = User::query()->find($userId);
+        $tracks = $user->recentlyPlayedTracks()->limit(10)->with('artists')->get()->keyBy('uuid');
+
         return [
-            'trackIds' => $tracksIds,
-            'tracks' => TrackResource::collection($tracks)
+            'trackIds' => array_keys($tracks->all()),
+            'tracks' => TrackResource::collection(array_values($tracks->all())),
         ];
     }
 }
