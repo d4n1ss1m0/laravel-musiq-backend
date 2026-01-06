@@ -19,6 +19,10 @@ class JwtAuthMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $token = $request->header('token');
+        if (empty($token)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         $jwtService = app()->make(JwtServiceInterface::class);
         $claims = $jwtService->parseToken($token);
 

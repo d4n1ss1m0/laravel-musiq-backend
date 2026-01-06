@@ -4,9 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-Route::prefix('artist')->middleware('auth:sanctum')->group(function () {
-    Route::get('{id}', [\App\Http\Controllers\Artist\ArtistController::class, 'getArtist']);
-});
+//Route::prefix('artist')->middleware('auth:sanctum')->group(function () {
+//    Route::get('{id}', [\App\Http\Controllers\Artist\ArtistController::class, 'getArtist']);
+//});
 
 
 

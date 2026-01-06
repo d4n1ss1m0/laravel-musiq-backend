@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 
+use App\Repositories\Playlist\PlaylistRepository;
+use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Repositories\RecentlyPlayedTrack\RecentlyPlayedTrackRepository;
 use App\Repositories\RecentlyPlayedTrack\RecentlyPlayedTrackRepositoryInterface;
 use App\Service\AuthService\AuthService;
@@ -27,6 +29,8 @@ use App\Repositories\Track\TrackRepository;
 use App\Repositories\Track\TrackRepositoryInterface;
 use App\Repositories\User\UserRepository;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Service\PlaylistService\PlaylistService;
+use App\Service\PlaylistService\PlaylistServiceInterface;
 use App\Service\TrackService\TrackService;
 use App\Service\TrackService\TrackServiceInterface;
 use Illuminate\Support\ServiceProvider;
@@ -40,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
     {
         //Services
         $this->app->bind(TrackServiceInterface::class, TrackService::class);
+        $this->app->bind(PlaylistServiceInterface::class, PlaylistService::class);
         $this->app->bind(RecentlyAddedTracksServiceInterface::class, RecentlyAddedTracksService::class);
         $this->app->bind(RecentlyPlayedPlaylistsServiceInterface::class, RecentlyPlayedPlaylistsService::class);
         $this->app->bind(RecentlyPlayedTracksServiceInterface::class, RecentlyPlayedTracksService::class);
@@ -49,6 +54,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TrackRepositoryInterface::class, TrackRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(RecentlyPlayedTrackRepositoryInterface::class, RecentlyPlayedTrackRepository::class);
+        $this->app->bind(PlaylistRepositoryInterface::class, PlaylistRepository::class);
 
         //Infrastructure
         $this->app->bind(ImageServiceInterface::class, ImageService::class);

@@ -21,7 +21,7 @@ class PlaylistResource extends JsonResource
         return[
             'id' => $this->id,
             'name' => $this->name,
-            'image' => $this->image ?'/image/'.$this->image : '',
+            'image' => $this->image ?'/image/playlist/'.$this->image : '',
             'type' => $this->playlistType->name,
             //'tracks' => TrackResource::collection($this->tracks)
         ];
