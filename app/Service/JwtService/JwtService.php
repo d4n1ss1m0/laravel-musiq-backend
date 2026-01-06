@@ -30,7 +30,7 @@ class JwtService implements JwtServiceInterface
             ->issuedBy('your-app')
             ->identifiedBy(uniqid(), true)
             ->issuedAt($now)
-            ->expiresAt($now->modify('+15 minutes'))
+            ->expiresAt($now->modify('+60 minutes'))
             ->withClaim('uid', $user->id)
             ->withClaim('type', 'access')
             ->getToken($this->config->signer(), $this->config->signingKey());

@@ -44,7 +44,6 @@ class MainPageController extends Controller
     }
 
     public function getRecentlyAddedTracks() {
-        dd('ff');
         try {
             return $this->success($this->recentlyAddedTracksService->getRecently());
         } catch (\Exception $e) {

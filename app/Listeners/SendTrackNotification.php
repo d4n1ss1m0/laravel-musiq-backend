@@ -27,7 +27,8 @@ class SendTrackNotification
     {
         $trackId = Track::query()
             ->where('uuid', $event->trackId)
-            ->first('id')->value('id');
+            ->value('id');
+
         $recentlyPlayedTrackTodayExists = RecentlyPlayedTrack::query()
             ->where('user_id', $event->userId)
             ->where('track_id', $trackId)

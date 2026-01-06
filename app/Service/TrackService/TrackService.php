@@ -30,7 +30,7 @@ class TrackService implements TrackServiceInterface
         $fileInfo = $getID3->analyze($filePath);
         $time = (int)round($fileInfo['playtime_seconds']);
         if($dto->cover != null) {
-            $cover = $this->fileService->addFile($dto->cover, 'image/track');
+            $cover = $this->fileService->addFile($dto->cover, 'image/track', 'webp');
         }
         $track = $this->trackRepository->create($dto->name, $time, $file, $cover ?? null, $userId);
         $artistsArray = $dto->artists;
@@ -74,7 +74,7 @@ class TrackService implements TrackServiceInterface
                         null,
                         true
                     );
-                    $artistCover = $this->fileService->addFile($uploaded, 'image/artist');
+                    $artistCover = $this->fileService->addFile($uploaded, 'image/artist', 'webp');
                 }
                 $artist = $this->artistRepository->create($item->name, $artistCover ?? null);
                 $item->id = $artist->id;

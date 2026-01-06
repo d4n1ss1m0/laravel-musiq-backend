@@ -62,7 +62,7 @@ class PlaylistController extends Controller
         $userId = $request->get('userId');
         try {
             if ($request->file) {
-                $cover = $this->fileService->addFile($request->file, 'image/playlist');
+                $cover = $this->fileService->addFile($request->file, 'image/playlist', 'webp');
             }
 
             $dto = new CreatePlaylistDTO($cover ?? null,

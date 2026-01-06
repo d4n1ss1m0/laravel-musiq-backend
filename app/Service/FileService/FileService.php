@@ -6,9 +6,14 @@ use Illuminate\Support\Str;
 
 class FileService implements FileServiceInterface
 {
-    public function addFile($file, $path): string
+    public function addFile($file, $path, string|null $extension = null): string
     {
-        $fileType = $file->getClientOriginalExtension();
+        if ($extension === null) {
+            $fileType = $file->getClientOriginalExtension();
+        } else {
+            $fileType = $extension;
+        }
+
         $hash = Str::uuid()->toString();
         $fileName = "{$hash}.{$fileType}";
         $path = $file->storeAs($path, $fileName, 'local');

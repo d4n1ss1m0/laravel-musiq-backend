@@ -9,7 +9,11 @@ class RecentlyAddedTracksService implements RecentlyAddedTracksServiceInterface
 {
 
     public function getRecently() {
-        $tracks = Track::limit(10)->orderByDesc('created_at')->get()->keyBy('uuid');
+        $tracks = Track::limit(10)
+            ->with('artists')
+            ->orderByDesc('created_at')
+            ->get()
+            ->keyBy('uuid');
 
         return [
             'trackIds' => array_keys($tracks->all()),
