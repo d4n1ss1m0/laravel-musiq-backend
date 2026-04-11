@@ -2,6 +2,7 @@
 
 namespace App\Service\TrackService;
 
+use App\Enum\MusicService;
 use App\Models\Track;
 use App\DTO\AddTrack\AddTrackDTO;
 use App\Repositories\Artist\ArtistRepositoryInterface;
@@ -9,6 +10,7 @@ use App\Repositories\Track\TrackRepositoryInterface;
 use App\Service\FileService\FileServiceInterface;
 use getID3;
 use Illuminate\Http\UploadedFile;
+use Symfony\Component\Process\Process;
 
 class TrackService implements TrackServiceInterface
 {
@@ -82,5 +84,37 @@ class TrackService implements TrackServiceInterface
             }
         }
         $track->artists()->syncWithoutDetaching($existsArtistsArray);
+    }
+
+    public function parseFromUrl(string $url, MusicService $musicService) {
+        $binary = config('services.musiq_downloader.binary');
+        $process = new Process([
+            $binary, $musicService->value, 'download',
+            '-u', 'https://www.youtube.com/watch?v=r6ZqpK1TGsA'
+        ]);
+        $process->setTimeout(300);
+        $process->run();
+
+
+        dd([
+            'exitCode'  => $process->getExitCode(),
+            'output'    => $process->getOutput(),
+            'error'     => $process->getErrorOutput(),
+            'isSuccess' => $process->isSuccessful(),
+        ]);
+
+        $output = $process->getOutput();
+
+// Ищем строку "PATH:  ..." и вытаскиваем путь
+        preg_match('/^PATH:\s+(.+)$/m', $output, $matches);
+
+        $filePath = $matches[1] ?? null;
+
+        if ($filePath) {
+            echo "Файл скачан: " . trim($filePath);
+        } else {
+            dd($output);
+            echo "Путь не найден в выводе";
+        }
     }
 }

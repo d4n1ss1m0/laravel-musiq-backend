@@ -10,6 +10,7 @@ services:
     working_dir: /var/www
     volumes:
       - .:/var/www
+      - /home/d4n1ss1m0/Музыка:/var/bin
     networks:
       - musiq
     depends_on:
@@ -29,6 +30,16 @@ services:
     volumes:
       - .:/var/www
     entrypoint: ["composer"]
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - COMPOSER_NO_INTERACTION=1
+      - COMPOSER_PREFER_DIST=1
+      - HTTP_PROXY=http://host.docker.internal:40000
+      - HTTPS_PROXY=http://host.docker.internal:40000
 
   nginx:
     image: nginx:alpine
@@ -59,6 +70,9 @@ services:
 
 networks:
   musiq:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1280
 
 volumes:
   db_data:

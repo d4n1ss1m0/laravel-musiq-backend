@@ -1,5 +1,5 @@
 # Используем официальный PHP образ
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 # Устанавливаем системные зависимости и PHP-расширения
 RUN apt-get update && apt-get install -y \
@@ -31,6 +31,8 @@ RUN mkdir -p /var/www/storage /var/www/bootstrap/cache \
 
 RUN echo "upload_max_filesize=50M" >> /usr/local/etc/php/conf.d/uploads.ini \
     && echo "post_max_size=50M" >> /usr/local/etc/php/conf.d/uploads.ini
+
+RUN apt-get update && apt-get install -y python3
 
 EXPOSE 9000
 

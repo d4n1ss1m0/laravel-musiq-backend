@@ -5,8 +5,10 @@ namespace App\Http\Controllers\AddTrack;
 
 use App\DTO\AddTrack\AddTrackDTO;
 use App\DTO\ArtistDTO;
+use App\Enum\MusicService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddTrack\AddTrackByFileRequest;
+use App\Http\Requests\AddTrack\ParseLinkRequest;
 use App\Service\TrackService\TrackServiceInterface;
 use App\Shared\Traits\HttpResponse;
 
@@ -32,5 +34,10 @@ class AddTrackController extends Controller
         $trackId = $useCase->addTrackByFile($trackDto, $userId);
 
         return $this->success(['trackId' => $trackId]);
+    }
+
+    public function parseFromLink(ParseLinkRequest $request, TrackServiceInterface $useCase)
+    {
+        $useCase->parseFromUrl($request->input('link'), MusicService::tryFrom($request->input('service')));
     }
 }

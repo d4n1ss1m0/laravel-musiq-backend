@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'musiq_downloader' => [
+        'binary' => env('MUSIQ_DOWNLOADER_BINARY', '/usr/local/bin/musiq-downloader'),
+    ]
+
 ];
