@@ -7,7 +7,7 @@ class RecentlyPlayedPlaylistsService implements RecentlyPlayedPlaylistsServiceIn
 
 
     public function getRecently() {
-
+        return [];
 //        $user = $this->accountService->getCurrentAccount();
 //        $playlists = $user->recentlyPlayedPlaylists()->get();
 //        return RecentlyPlayedPlaylistsResource::collection($playlists);
