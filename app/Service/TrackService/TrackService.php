@@ -118,7 +118,7 @@ class TrackService implements TrackServiceInterface
     {
         $process = new Process([
             $binary, $musicService->value, 'cover',
-            '-o', storage_path('app/audio/tmp'), $url
+            '-o', storage_path('app/image/tmp'), $url
         ]);
         $process->setTimeout(300);
         $process->run();

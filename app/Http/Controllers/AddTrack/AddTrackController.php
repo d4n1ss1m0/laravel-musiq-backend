@@ -38,6 +38,7 @@ class AddTrackController extends Controller
 
     public function parseFromLink(ParseLinkRequest $request, TrackServiceInterface $useCase)
     {
-        $useCase->parseFromUrl($request->input('link'), MusicService::tryFrom($request->input('service')));
+        $result = $useCase->parseFromUrl($request->input('link'), MusicService::tryFrom($request->input('service')));
+        return $this->success($result);
     }
 }
