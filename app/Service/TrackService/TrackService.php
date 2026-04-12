@@ -97,6 +97,13 @@ class TrackService implements TrackServiceInterface
 
         $output = $process->getOutput();
 
+        dd([
+            'exitCode'  => $process->getExitCode(),
+            'output'    => $process->getOutput(),
+            'error'     => $process->getErrorOutput(),
+            'isSuccess' => $process->isSuccessful(),
+        ]);
+
 // Ищем строку "PATH:  ..." и вытаскиваем путь
         preg_match('/^PATH:\s+(.+)$/m', $output, $matches);
 
