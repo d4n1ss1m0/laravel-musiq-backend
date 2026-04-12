@@ -88,6 +88,15 @@ class TrackService implements TrackServiceInterface
 
     public function parseFromUrl(string $url, MusicService $musicService) {
         $binary = config('services.musiq_downloader.binary');
+        return [
+            'audio' => $this->getAudioFile($binary, $musicService, $url),
+            'cover' => $this->getCoverFile($binary, $musicService, $url),
+            'name' => $this->getTrackName($binary, $musicService, $url),
+        ];
+    }
+
+    private function getAudioFile(string $binary, MusicService $musicService, string $url) : string|null
+    {
         $process = new Process([
             $binary, $musicService->value, 'download',
             '-o', storage_path('app/audio/tmp'), $url
@@ -97,22 +106,54 @@ class TrackService implements TrackServiceInterface
 
         $output = $process->getOutput();
 
-        dd([
-            'exitCode'  => $process->getExitCode(),
-            'output'    => $process->getOutput(),
-            'error'     => $process->getErrorOutput(),
-            'isSuccess' => $process->isSuccessful(),
-        ]);
-
 // Ищем строку "PATH:  ..." и вытаскиваем путь
         preg_match('/^PATH:\s+(.+)$/m', $output, $matches);
 
         $filePath = $matches[1] ?? null;
 
+        return $filePath;
+    }
+
+    private function getCoverFile(string $binary, MusicService $musicService, string $url) : string|null
+    {
+        $process = new Process([
+            $binary, $musicService->value, 'cover',
+            '-o', storage_path('app/audio/tmp'), $url
+        ]);
+        $process->setTimeout(300);
+        $process->run();
+
+        $output = $process->getOutput();
+
+// Ищем строку "PATH:  ..." и вытаскиваем путь
+        preg_match('/^COVER:\s+(.+)$/m', $output, $matches);
+
+        $filePath = $matches[1] ?? null;
+
         if ($filePath) {
-            echo "Файл скачан: " . trim($filePath);
+            $outputFile = basename($output); // d1aca076-8fe5-4840-8720-2b97f83c08b2.mp3
+            $relativePath = 'tmp/' . $outputFile;
+            return $relativePath;
         } else {
-            echo "Путь не найден в выводе";
+            return null;
         }
+    }
+
+    private function getTrackName(string $binary, MusicService $musicService, string $url) : string|null
+    {
+        $process = new Process([
+            $binary, $musicService->value, 'name',
+        ]);
+        $process->setTimeout(300);
+        $process->run();
+
+        $output = $process->getOutput();
+
+// Ищем строку "PATH:  ..." и вытаскиваем путь
+        preg_match('/^NAME:\s+(.+)$/m', $output, $matches);
+
+        $filePath = $matches[1] ?? null;
+
+        return $filePath;
     }
 }
