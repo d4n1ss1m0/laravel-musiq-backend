@@ -90,18 +90,10 @@ class TrackService implements TrackServiceInterface
         $binary = config('services.musiq_downloader.binary');
         $process = new Process([
             $binary, $musicService->value, 'download',
-            '-u', 'https://www.youtube.com/watch?v=r6ZqpK1TGsA'
+            '-o', storage_path('app/audio/tmp'), $url
         ]);
         $process->setTimeout(300);
         $process->run();
-
-
-        dd([
-            'exitCode'  => $process->getExitCode(),
-            'output'    => $process->getOutput(),
-            'error'     => $process->getErrorOutput(),
-            'isSuccess' => $process->isSuccessful(),
-        ]);
 
         $output = $process->getOutput();
 
@@ -113,7 +105,6 @@ class TrackService implements TrackServiceInterface
         if ($filePath) {
             echo "Файл скачан: " . trim($filePath);
         } else {
-            dd($output);
             echo "Путь не найден в выводе";
         }
     }
