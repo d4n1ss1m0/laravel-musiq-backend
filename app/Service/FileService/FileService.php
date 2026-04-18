@@ -24,10 +24,10 @@ class FileService implements FileServiceInterface
     {
         try {
             $hash = Str::uuid()->toString();
-            $outputFile = storage_path('app/audio') . '/' . $hash . '.opus';
+            $outputFile = storage_path('app/audio') . '/' . $hash . '.ogg';
 
             $command = sprintf(
-                'ffmpeg -i %s -c:a libopus -b:a 96k -vbr on -ar 48000 -application audio %s 2>&1',
+                'ffmpeg -i %s -c:a libvorbis -q:a 5 -ar 48000 %s 2>&1',
                 escapeshellarg($path),
                 escapeshellarg($outputFile)
             );
@@ -40,7 +40,7 @@ class FileService implements FileServiceInterface
 
             unlink($path);
 
-            return $hash . '.opus';
+            return $hash . '.ogg';
         } catch (\Exception $e) {
             throw $e;
         }
