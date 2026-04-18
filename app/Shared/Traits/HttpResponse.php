@@ -25,7 +25,7 @@ trait HttpResponse
         $response = new StreamedResponse();
 
         // Устанавливаем заголовки
-        $response->headers->set('Content-Type', 'audio/webm');
+        $response->headers->set('Content-Type', 'audio/ogg');
         $response->headers->set('Content-Disposition', 'inline; filename="' . basename($filePath) . '"');
         $response->headers->set('Accept-Ranges', 'bytes');
 

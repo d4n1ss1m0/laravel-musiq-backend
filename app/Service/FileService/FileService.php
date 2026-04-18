@@ -24,35 +24,25 @@ class FileService implements FileServiceInterface
     {
         try {
             $hash = Str::uuid()->toString();
-            $outputFile = storage_path('app/audio') . '/' . $hash . '.mp3';
-            // Составляем команду FFmpeg
-            //putenv('PATH=/usr/bin:/usr/local/bin:' . getenv('PATH'));
+            $outputFile = storage_path('app/audio') . '/' . $hash . '.opus';
+
             $command = sprintf(
-                'ffmpeg -i %s -c:a libmp3lame -b:a 128k -vbr on -ar 48000 %s',
+                'ffmpeg -i %s -c:a libopus -b:a 96k -vbr on -ar 48000 -application audio %s 2>&1',
                 escapeshellarg($path),
                 escapeshellarg($outputFile)
             );
 
-            // Выполняем команду
             exec($command, $output, $returnCode);
-            // Проверяем успешность выполнения команды
+
             if ($returnCode !== 0) {
-                return response()->json([
-                    'error' => 'Ошибка конвертации файла.',
-                    'output' => $output,
-                ], 500);
+                throw new \RuntimeException('FFmpeg error: ' . implode("\n", $output));
             }
 
-            // Удаляем исходный файл (опционально)
             unlink($path);
 
-            return $hash . '.mp3';
+            return $hash . '.opus';
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Произошла ошибка при конвертации файла.',
-                'message' => $e->getMessage(),
-            ], 500);
+            throw $e;
         }
-
     }
 }

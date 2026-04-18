@@ -36,20 +36,7 @@ class TrackService implements TrackServiceInterface
         }
         $track = $this->trackRepository->create($dto->name, $time, $file, $cover ?? null, $userId);
         $artistsArray = $dto->artists;
-//        $existsArtistsArray = [];
-//        foreach ($artistsArray as $item) {
-//            if(isset($item->id)) {
-//                $existsArtistsArray[] = $item->id;
-//            } else {
-//                if($dto->cover != null) {
-//                    $artistCover = $this->fileService->addFile($dto->cover, 'image/artist');
-//                }
-//                $artist = $this->artistRepository->create($item->name, $artistCover ?? null);
-//                $item->id = $artist->id;
-//                $existsArtistsArray[] = $item->id;
-//            }
-//        }
-//        $track->artists()->syncWithoutDetaching($existsArtistsArray);
+
 
         $this->addArtistsToTrack($track, $artistsArray);
 
@@ -111,7 +98,13 @@ class TrackService implements TrackServiceInterface
 
         $filePath = $matches[1] ?? null;
 
-        return $filePath;
+        if ($filePath) {
+            $outputFile = basename($output); // d1aca076-8fe5-4840-8720-2b97f83c08b2.mp3
+            $relativePath = 'tmp/' . $outputFile;
+            return $relativePath;
+        } else {
+            return null;
+        }
     }
 
     private function getCoverFile(string $binary, MusicService $musicService, string $url) : string|null
