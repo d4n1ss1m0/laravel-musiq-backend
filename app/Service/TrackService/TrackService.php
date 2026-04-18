@@ -53,7 +53,7 @@ class TrackService implements TrackServiceInterface
 
         $this->addArtistsToTrack($track, $artistsArray);
 
-        return $track->id;
+        return $track->uuid;
     }
 
     public function addArtistsToTrack(Track $track, array $artists)
