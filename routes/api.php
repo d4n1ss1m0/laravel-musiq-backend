@@ -11,4 +11,5 @@ include __DIR__ . '/Playlist/api.php';
 include __DIR__ . '/Artist/api.php';
 include __DIR__ . '/Search/api.php';
 include __DIR__ . '/AddFile/api.php';
+include __DIR__ . '/personal/api.php';
 
