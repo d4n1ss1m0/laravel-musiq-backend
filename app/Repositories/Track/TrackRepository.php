@@ -26,6 +26,7 @@ class TrackRepository implements TrackRepositoryInterface
     {
         return Track::query()
             ->whereIn('uuid', $ids)
+            ->with('artists')
             ->get();
     }
 
