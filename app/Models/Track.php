@@ -36,7 +36,7 @@ class Track extends Model
     ];
 
     public function artists() {
-        return $this->belongsToMany(Artist::class, 'track_artists');
+        return $this->belongsToMany(Artist::class, 'track_artists')->orderByPivot('id');
     }
 
 
