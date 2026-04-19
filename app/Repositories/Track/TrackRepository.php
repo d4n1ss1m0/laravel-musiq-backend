@@ -3,11 +3,13 @@
 namespace App\Repositories\Track;
 
 use App\Models\Track;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class TrackRepository implements TrackRepositoryInterface
 {
 
-    public function create(string $name, int $time, string $file, string $cover, int $userId)
+    public function create(string $name, int $time, string $file, string $cover, int $userId) : Track
     {
         $track = Track::create([
             'name' => $name,
@@ -20,10 +22,17 @@ class TrackRepository implements TrackRepositoryInterface
         return $track;
     }
 
-    public function getTrackByUuids(array $ids)
+    public function getTrackByUuids(array $ids) : Collection
     {
         return Track::query()
             ->whereIn('uuid', $ids)
             ->get();
+    }
+
+    public function getAddedByUserId(int $userId, int $perPage = 10) : LengthAwarePaginator
+    {
+        return Track::query()
+            ->where('user_id', $userId)
+            ->paginate($perPage);
     }
 }
