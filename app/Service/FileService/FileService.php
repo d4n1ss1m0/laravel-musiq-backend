@@ -2,6 +2,7 @@
 
 namespace App\Service\FileService;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class FileService implements FileServiceInterface
@@ -44,5 +45,13 @@ class FileService implements FileServiceInterface
         } catch (\Exception $e) {
             throw $e;
         }
+    }
+
+    public function moveFile(string $from, string $to)
+    {
+        Storage::disk('local')->move(
+            $from,
+            $to
+        );
     }
 }

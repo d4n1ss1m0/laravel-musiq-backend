@@ -2,6 +2,7 @@
 
 namespace App\Service\TrackService;
 
+use App\DTO\AddTrack\AddTrackLinkDTO;
 use App\Enum\MusicService;
 use App\Models\Track;
 use App\DTO\AddTrack\AddTrackDTO;
@@ -37,6 +38,32 @@ class TrackService implements TrackServiceInterface
         $track = $this->trackRepository->create($dto->name, $time, $file, $cover ?? null, $userId);
         $artistsArray = $dto->artists;
 
+
+        $this->addArtistsToTrack($track, $artistsArray);
+
+        return $track->uuid;
+    }
+
+    public function addTrackByLink(AddTrackLinkDTO $dto, int $userId) {
+        $file = $dto->file;
+        $filePath = storage_path('app/audio/' . $file);
+
+        $this->fileService->moveFile('audio/tmp/' . $file, 'audio/' . $file);
+
+        $getID3 = new getID3();
+        $fileInfo = $getID3->analyze($filePath);
+
+        $time = (int)round($fileInfo['playtime_seconds']);
+        if($dto->cover != null) {
+            $cover = $this->fileService->addFile($dto->cover, 'image/track', 'webp');
+        } elseif ($dto->coverName != null) {
+            $cover = $dto->coverName;
+
+            $this->fileService->moveFile('image/tmp/' . $cover, 'image/track/' . $cover);
+        }
+
+        $track = $this->trackRepository->create($dto->name, $time, $file, $cover ?? null, $userId);
+        $artistsArray = $dto->artists;
 
         $this->addArtistsToTrack($track, $artistsArray);
 
