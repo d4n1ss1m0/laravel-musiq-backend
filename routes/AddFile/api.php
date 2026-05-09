@@ -6,9 +6,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('addTrack')->middleware(\App\Http\Middleware\JwtAuthMiddleware::class)->group(function () {
     Route::post('/', [\App\Http\Controllers\AddTrack\AddTrackController::class, 'addTrackByFile']);
-    Route::post('/parse', [\App\Http\Controllers\AddTrack\AddTrackController::class, 'parseFromLink']);
-    Route::post('/after-parse', [\App\Http\Controllers\AddTrack\AddTrackController::class, 'addTrackByFile']);
-
+    Route::prefix('parse')->group(function () {
+        Route::post('/', [\App\Http\Controllers\AddTrack\AddTrackController::class, 'parseFromLink']);
+        Route::post('/after-parse', [\App\Http\Controllers\AddTrack\AddTrackController::class, 'addAfterParse']);
+    });
     //Route::get('{id}/tracks', [\App\Http\Controllers\Playlist\PlaylistController::class, 'getTracks']);
 });
 

@@ -16,7 +16,9 @@ class AddTrackByLinkRequest extends AddTrackBaseRequest
     public function rules(): array
     {
         return array_merge(parent::rules(), [
-            'cover' => 'sometimes|file|mimes:jpg,png,webp'
+            'cover' => 'required_without:coverName|file|mimes:jpg,png,webp',
+            'coverName' => 'required_without:cover|string|max:255',
+            'file' => 'required|string|max:255'
         ]);
     }
 
@@ -25,6 +27,8 @@ class AddTrackByLinkRequest extends AddTrackBaseRequest
         $messages = [
             'cover.file' => 'Обложка должна быть файлом.',
             'cover.mimes' => 'Обложка должна быть в формате JPG или PNG.',
+            'cover.required_without' => 'Файл обязателен, если нет временного файла',
+            'coverName.required_without' => 'Название временного файла обязательно, если нет файла'
         ];
 
         $parent = parent::messages();
