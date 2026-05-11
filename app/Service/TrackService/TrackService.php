@@ -114,7 +114,7 @@ class TrackService implements TrackServiceInterface
         $process = new Process([
             $binary, $musicService->value, 'download',
             '-o', storage_path('app/audio/tmp'), $url
-        ]);
+        ], dirname($binary));
         $process->setTimeout(300);
         $process->run();
 
@@ -139,7 +139,7 @@ class TrackService implements TrackServiceInterface
         $process = new Process([
             $binary, $musicService->value, 'cover',
             '-o', storage_path('app/image/tmp'), $url
-        ]);
+        ], dirname($binary));
         $process->setTimeout(300);
         $process->run();
 
@@ -162,8 +162,8 @@ class TrackService implements TrackServiceInterface
     private function getTrackName(string $binary, MusicService $musicService, string $url) : string|null
     {
         $process = new Process([
-            $binary, $musicService->value, 'name',
-        ]);
+            $binary, $musicService->value, 'name', $url
+        ], dirname($binary));
         $process->setTimeout(300);
         $process->run();
 
