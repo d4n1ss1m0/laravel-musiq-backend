@@ -12,7 +12,7 @@ class RecentlyPlayedTracksService implements RecentlyPlayedTracksServiceInterfac
 
     public function getRecently(int $userId) {
         $user = User::query()->find($userId);
-        $tracks = $user->recentlyPlayedTracks()->limit(10)->with('artists')->orderByDesc('updated_at')->get()->keyBy('uuid');
+        $tracks = $user->recentlyPlayedTracks()->limit(10)->with('artists')->orderByDesc('recently_played_tracks.updated_at')->get()->keyBy('uuid');
 
         return [
             'trackIds' => array_keys($tracks->all()),
