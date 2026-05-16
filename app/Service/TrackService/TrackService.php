@@ -101,7 +101,7 @@ class TrackService implements TrackServiceInterface
         if ($filePath) {
             $outputFile = basename($output); // d1aca076-8fe5-4840-8720-2b97f83c08b2.mp3
             $relativePath = 'tmp/' . $outputFile;
-            return $relativePath;
+            return str_replace('\n', '', $relativePath);
         } else {
             return null;
         }
@@ -147,6 +147,6 @@ class TrackService implements TrackServiceInterface
 
         $filePath = $matches[1] ?? null;
 
-        return $filePath;
+        return str_replace('\n', '', $filePath);
     }
 }
