@@ -9,4 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::useCache('file');
-Schedule::command('tmp:clear --minutes=30')->everyThirtyMinutes();
+Schedule::command('tmp:clear --minutes=30')->everyFiveMinutes();
