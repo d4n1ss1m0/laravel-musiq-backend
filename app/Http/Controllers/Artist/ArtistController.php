@@ -21,4 +21,19 @@ class ArtistController extends Controller
         }
         return $this->success(new ArtistsResource($artist));
     }
+
+    public function searchArtists(Request $request)
+    {
+        $artists = Artist::query();
+
+        if ($request->has('query')) {
+            $artists->where('name', 'ilike', '%' . $request->input('query') . '%');
+        }
+
+        $artists = $artists->paginate(10);
+
+        $artistsItems = ArtistsResource::collection($artists->items());
+
+        return $this->success($this->paginator($artistsItems, $artists->total(), $artists->perPage(), $artists->currentPage()));
+    }
 }
