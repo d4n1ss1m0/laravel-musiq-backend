@@ -32,7 +32,7 @@ class AddTrackBaseRequest extends FormRequest
             'name' => 'required|string',
             'artists' => 'required|array',
             'artists.*.id' => 'nullable|integer',
-            'artists.*.name' => 'required|string',
+            'artists.*.name' => 'required_without:artists.*.id|string',
         ];
     }
 
