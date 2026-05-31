@@ -50,7 +50,7 @@ class AddTrackController extends Controller
 
         $artistArray = [];
         foreach ($request->get('artists') as $artist) {
-            $artistArray[] = new ArtistDTO($artist['name'], $artist['id'] ?? null);
+            $artistArray[] = new ArtistDTO($artist['name'] ?? null, $artist['id'] ?? null);
         }
 
         $coverName = null;
