@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Personal;
 
+use App\Enum\Fields\Fields;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Utility\PaginateRequest;
 use App\Http\Resources\Tracks\TrackResource;
@@ -14,12 +15,12 @@ class PersonalController extends Controller
     use HttpResponse;
     public function getAdded(PaginateRequest $request, TrackRepositoryInterface $trackRepository)
     {
-        $perPage = $request->query('perPage', config('app.per_page_default'));
+        $perPage = $request->query(Fields::PerPage->value, config('app.per_page_default'));
         $userId = $request->attributes->get('userId');
         $tracks = $trackRepository->getAddedByUserId($userId, $perPage);
         $tracksResources = TrackResource::collection($tracks);
         $keyValueArray = [
-            'items' => $tracksResources,
+            Fields::Items->value => $tracksResources,
         ];
         return $this->success($this->paginator($keyValueArray, $tracks->total(), $tracks->perPage(), $tracks->currentPage()));
     }

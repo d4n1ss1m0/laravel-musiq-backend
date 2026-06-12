@@ -2,14 +2,9 @@
 
 namespace App\Http\Requests\Utility;
 
+use App\Enum\Fields\Fields;
 use App\Enums\SearchTypes;
-use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class PaginateRequest extends FormRequest
 {
@@ -29,8 +24,8 @@ class PaginateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'page' => 'sometimes|integer|min:1',
-            'perPage' => sprintf(
+            Fields::Page->value => 'sometimes|integer|min:1',
+            Fields::PerPage->value => sprintf(
                 "sometimes|integer|max:%d|min:%d",
                 config('app.per_page_max_default'),
                 config('app.per_page_min_default')
