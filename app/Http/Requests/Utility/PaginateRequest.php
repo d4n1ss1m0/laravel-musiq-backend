@@ -30,23 +30,29 @@ class PaginateRequest extends FormRequest
     {
         return [
             'page' => 'sometimes|integer|min:1',
-            'perPage' => 'sometimes|integer|max:50|min:10',
+            'perPage' => sprintf(
+                "sometimes|integer|max:%d|min:%d",
+                config('app.per_page_max_default'),
+                config('app.per_page_min_default')
+            ),
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
-            'messages' => [
-                'name.required' => 'Название трека обязательно для заполнения.',
-                'name.string' => 'Название трека должно быть строкой.',
+            'page.integer' => 'Номер страницы должен быть целым числом.',
+            'page.min' => 'Номер страницы должен быть не меньше 1.',
 
-                'artists.required' => 'Укажите хотя бы одного артиста.',
-                'artists.array' => 'Список артистов должен быть массивом.',
-                'artists.*.id.integer' => 'Идентификатор артиста должен быть числом.',
-                'artists.*.name.required' => 'Имя каждого артиста обязательно.',
-                'artists.*.name.string' => 'Имя артиста должно быть строкой.',
-            ],
+            'perPage.integer' => 'Количество элементов на странице должно быть целым числом.',
+            'perPage.min' => sprintf(
+                'Количество элементов на странице должно быть не меньше %d.',
+                config('app.per_page_min_default')
+            ),
+            'perPage.max' => sprintf(
+                'Количество элементов на странице должно быть не больше %d.',
+                config('app.per_page_max_default')
+            ),
         ];
     }
 
