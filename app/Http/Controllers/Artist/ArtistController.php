@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Artist;
 
+use App\Enum\Fields\Fields;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Utility\PaginateRequest;
 use App\Http\Resources\Artist\ArtistsResource;
@@ -25,7 +26,7 @@ class ArtistController extends Controller
 
     public function searchArtists(PaginateRequest $request)
     {
-        $perPage = $request->query('perPage', config('app.per_page_default'));
+        $perPage = $request->query(Fields::PerPage->value, config('app.per_page_default'));
         $artists = Artist::query();
 
         if ($request->has('query')) {
@@ -37,7 +38,7 @@ class ArtistController extends Controller
         $artistsItems = ArtistsResource::collection($artists->items());
 
         $keyValueArray = [
-            'items' => $artistsItems,
+            Fields::Items->value => $artistsItems,
         ];
 
         return $this->success($this->paginator($keyValueArray, $artists->total(), $artists->perPage(), $artists->currentPage()));

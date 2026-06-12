@@ -3,17 +3,13 @@
 namespace App\Http\Controllers\MainPage;
 
 
-use App\DTO\AddTrack\AddTrackDTO;
-use App\DTO\ArtistDTO;
+use App\Enum\Fields\Fields;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AddTrack\AddTrackByFileRequest;
 use App\Http\Requests\Utility\PaginateRequest;
 use App\Http\Resources\Tracks\TrackResource;
-use App\Service\ImageService\ImageServiceInterface;
 use App\Service\MainPage\RecentlyAddedTracks\RecentlyAddedTracksServiceInterface;
 use App\Service\MainPage\RecentlyPlayedPlaylists\RecentlyPlayedPlaylistsServiceInterface;
 use App\Service\MainPage\RecentlyPlayedTracks\RecentlyPlayedTracksServiceInterface;
-use App\Service\TrackService\TrackServiceInterface;
 use App\Shared\Traits\HttpResponse;
 use Illuminate\Http\Request;
 
@@ -47,11 +43,11 @@ class MainPageController extends Controller
 
     public function getRecentlyAddedTracks(PaginateRequest $request) {
         try {
-            $perPage = $request->query('perPage', config('app.per_page_default'));
+            $perPage = $request->query(Fields::PerPage->value, config('app.per_page_default'));
             $tracks = $this->recentlyAddedTracksService->getRecently($perPage);
             $keyValueArray = [
-                'itemsIds' => array_column($tracks->items(), 'uuid'),
-                'items' => TrackResource::collection($tracks),
+                Fields::ItemsIds->value => array_column($tracks->items(), 'uuid'),
+                Fields::Items->value  => TrackResource::collection($tracks),
             ];
 
             return $this->success($this->paginator($keyValueArray, $tracks->total(), $tracks->perPage(), $tracks->currentPage()));
