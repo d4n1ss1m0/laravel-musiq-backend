@@ -123,6 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'per_page_default' => env('PER_PAGE_DEFAULT', 10)
+    'per_page_default' => env('PER_PAGE_DEFAULT', 10),
+    'per_page_min_default' => env('PER_PAGE_MIN_DEFAULT', 1),
+    'per_page_max_default' => env('PER_PAGE_MAX_DEFAULT', 50),
 
 ];
