@@ -7,6 +7,8 @@ use App\DTO\AddTrack\AddTrackDTO;
 use App\DTO\ArtistDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddTrack\AddTrackByFileRequest;
+use App\Http\Requests\Utility\PaginateRequest;
+use App\Http\Resources\Tracks\TrackResource;
 use App\Service\ImageService\ImageServiceInterface;
 use App\Service\MainPage\RecentlyAddedTracks\RecentlyAddedTracksServiceInterface;
 use App\Service\MainPage\RecentlyPlayedPlaylists\RecentlyPlayedPlaylistsServiceInterface;
@@ -43,9 +45,16 @@ class MainPageController extends Controller
         }
     }
 
-    public function getRecentlyAddedTracks() {
+    public function getRecentlyAddedTracks(PaginateRequest $request) {
         try {
-            return $this->success($this->recentlyAddedTracksService->getRecently());
+            $perPage = $request->query('perPage', config('app.per_page_default'));
+            $tracks = $this->recentlyAddedTracksService->getRecently($perPage);
+            $keyValueArray = [
+                'itemsIds' => array_column($tracks->items(), 'uuid'),
+                'items' => TrackResource::collection($tracks),
+            ];
+
+            return $this->success($this->paginator($keyValueArray, $tracks->total(), $tracks->perPage(), $tracks->currentPage()));
         } catch (\Exception $e) {
             return $this->error($e->getMessage());
         }

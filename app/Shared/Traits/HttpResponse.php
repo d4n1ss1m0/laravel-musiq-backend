@@ -2,8 +2,6 @@
 
 namespace App\Shared\Traits;
 
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 trait HttpResponse
@@ -44,13 +42,16 @@ trait HttpResponse
         return $response;
     }
 
-    public function paginator(array|AnonymousResourceCollection|Collection $items, int $total, int $perPage, int $currentPage) : array
+    public function paginator(array $keyValueArray, int $total, int $perPage, int $currentPage) : array
     {
         return [
-            'items' => $items,
-            'total' => $total,
-            'perPage' => $perPage,
-            'currentPage' => $currentPage
+            ...$keyValueArray,
+            'pagination' => [
+                'total' => $total,
+                'perPage' => $perPage,
+                'currentPage' => $currentPage,
+                'lastPage' => max((int) ceil($total / $perPage), 1),
+            ],
         ];
     }
 }
