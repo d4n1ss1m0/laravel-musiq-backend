@@ -15,26 +15,30 @@ class MusicStreamController extends Controller
     use HttpResponse;
     public function stream(string $id, Request $request, PlayerService $useCase)
     {
-        $userId = $request->attributes->get('userId');
-        if(request()->headers->has('Range')) {
-            $range = request()->headers->get('Range');
-            $range = preg_replace('/bytes=/', '', $range);
-            $range = explode('-', $range);
+        try {
+            $userId = $request->attributes->get('userId');
+            if (request()->headers->has('Range')) {
+                $range = request()->headers->get('Range');
+                $range = preg_replace('/bytes=/', '', $range);
+                $range = explode('-', $range);
 
-            $start = (int)$range[0];
-            $end = isset($range[1]) && $range[1] !== '' ? (int)$range[1] : null;
-        } else {
-            $start = null;
-            $end = null;
-        };
-        Log::info("Range {$start}-{$end}");
+                $start = (int)$range[0];
+                $end = isset($range[1]) && $range[1] !== '' ? (int)$range[1] : null;
+            } else {
+                $start = null;
+                $end = null;
+            };
+            Log::info("Range {$start}-{$end}");
 
-        [$filePath, $fileSize, $callback, $start, $end] = $useCase->streamData($id, $start, $end);
+            [$filePath, $fileSize, $callback, $start, $end] = $useCase->streamData($id, $start, $end);
 //        dd($end);
 //        dd([$filePath, $fileSize, $callback, $start, $end]);
-        if ($userId) {
-            event(new TrackPlayed($userId, $id));
+            if ($userId) {
+                event(new TrackPlayed($userId, $id));
+            }
+            return $this->musicStream($filePath, $callback, $fileSize, $start, $end);
+        } catch (\Throwable $e) {
+            dd($e);
         }
-        return $this->musicStream($filePath, $callback, $fileSize, $start, $end);
     }
 }

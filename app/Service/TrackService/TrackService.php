@@ -45,11 +45,11 @@ class TrackService implements TrackServiceInterface
     }
 
     public function addTrackByLink(AddTrackLinkDTO $dto, int $userId) {
-        $file = $dto->file;
-        $filePath = storage_path('app/audio/' . $file);
+        $file = basename($dto->file);
 
         $this->fileService->moveFile('audio/tmp/' . $file, 'audio/' . $file);
 
+        $filePath = storage_path('app/audio/' . $file);
         $getID3 = new getID3();
         $fileInfo = $getID3->analyze($filePath);
 
