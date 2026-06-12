@@ -47,11 +47,18 @@ class FileService implements FileServiceInterface
         }
     }
 
-    public function moveFile(string $from, string $to)
+    public function moveFile(string $from, string $to): void
     {
-        Storage::disk('local')->move(
-            $from,
-            $to
-        );
+        $disk = Storage::disk('local');
+
+        if (!$disk->exists($from)) {
+            throw new \RuntimeException("File not found: {$from}");
+        }
+
+        $disk->makeDirectory(dirname($to));
+
+        if (!$disk->move($from, $to)) {
+            throw new \RuntimeException("Could not move file from {$from} to {$to}");
+        }
     }
 }
