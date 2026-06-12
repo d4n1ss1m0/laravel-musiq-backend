@@ -2,23 +2,18 @@
 
 namespace App\Service\MainPage\RecentlyAddedTracks;
 
-use App\Http\Resources\Tracks\TrackResource;
 use App\Models\Track;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class RecentlyAddedTracksService implements RecentlyAddedTracksServiceInterface
 {
 
-    public function getRecently() {
-        $tracks = Track::limit(10)
+    public function getRecently(int $perPage = 10): LengthAwarePaginator {
+        $paginator = Track::query()
             ->with('artists')
             ->orderByDesc('created_at')
-            ->get()
-            ->keyBy('uuid');
+            ->paginate($perPage);
 
-        return [
-            'trackIds' => array_keys($tracks->all()),
-            'tracks' => TrackResource::collection(array_values($tracks->all())),
-        ];
-
+        return $paginator;
     }
 }

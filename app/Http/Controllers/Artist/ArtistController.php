@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Artist;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Utility\PaginateRequest;
 use App\Http\Resources\Artist\ArtistsResource;
 use App\Http\Resources\Tracks\TrackResource;
 use App\Models\Artist;
@@ -22,18 +23,23 @@ class ArtistController extends Controller
         return $this->success(new ArtistsResource($artist));
     }
 
-    public function searchArtists(Request $request)
+    public function searchArtists(PaginateRequest $request)
     {
+        $perPage = $request->query('perPage', config('app.per_page_default'));
         $artists = Artist::query();
 
         if ($request->has('query')) {
             $artists->where('name', 'ilike', '%' . $request->input('query') . '%');
         }
 
-        $artists = $artists->paginate(10);
+        $artists = $artists->paginate($perPage);
 
         $artistsItems = ArtistsResource::collection($artists->items());
 
-        return $this->success($this->paginator($artistsItems, $artists->total(), $artists->perPage(), $artists->currentPage()));
+        $keyValueArray = [
+            'items' => $artistsItems,
+        ];
+
+        return $this->success($this->paginator($keyValueArray, $artists->total(), $artists->perPage(), $artists->currentPage()));
     }
 }
