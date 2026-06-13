@@ -25,7 +25,7 @@ class CreatePlaylistRequest extends FormRequest
         return [
             'file' => 'required|file|mimes:jpg,png,webp',
             'name' => 'required|string',
-            'tracks' => 'required|array',
+//            'tracks' => 'required|array',
             'type' => 'required|string|in:'. implode(',', [PlaylistTypes::PRIVATE->value, PlaylistTypes::PUBLIC->value]),
         ];
     }

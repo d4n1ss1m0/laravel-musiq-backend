@@ -20,6 +20,7 @@ class TrackPlaylist extends Model
     protected $fillable = [
         'track_id',
         'playlist_id',
+        'order'
     ];
 
 }
