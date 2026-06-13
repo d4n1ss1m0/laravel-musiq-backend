@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Player;
 
+use App\Shared\Fields\Fields;
 use App\Enums\SearchTypes;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +30,7 @@ class TracksRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ids' => 'required|string',
+            Fields::IDS => 'required|string',
         ];
     }
 
@@ -37,8 +38,8 @@ class TracksRequest extends FormRequest
     {
         return [
             'messages' => [
-                'ids.required' => 'Необходимо указать id треков',
-                'ids.string' => 'Необходимо указать id треков через запятую',
+                sprintf('%s.required', Fields::IDS) => 'Необходимо указать id треков',
+                sprintf('%s.string', Fields::IDS) => 'Необходимо указать id треков через запятую',
             ],
         ];
     }

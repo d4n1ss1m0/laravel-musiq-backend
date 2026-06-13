@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\AddTrack;
 
+use App\Shared\Fields\Fields;
 use App\Enums\SearchTypes;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,10 +30,10 @@ class AddTrackBaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
-            'artists' => 'required|array',
-            'artists.*.id' => 'nullable|integer',
-            'artists.*.name' => 'required_without:artists.*.id|string',
+            Fields::NAME => 'required|string',
+            Fields::ARTISTS => 'required|array',
+            sprintf('%s.*.%s', Fields::ARTISTS, Fields::ID) => 'nullable|integer',
+            sprintf('%s.*.%s', Fields::ARTISTS, Fields::NAME) => 'required_without:artists.*.id|string',
         ];
     }
 
@@ -40,14 +41,14 @@ class AddTrackBaseRequest extends FormRequest
     {
         return [
             'messages' => [
-                'name.required' => 'Название трека обязательно для заполнения.',
-                'name.string' => 'Название трека должно быть строкой.',
+                sprintf('%s.required', Fields::NAME) => 'Название трека обязательно для заполнения.',
+                sprintf('%s.string', Fields::NAME)  => 'Название трека должно быть строкой.',
 
-                'artists.required' => 'Укажите хотя бы одного артиста.',
-                'artists.array' => 'Список артистов должен быть массивом.',
-                'artists.*.id.integer' => 'Идентификатор артиста должен быть числом.',
-                'artists.*.name.required' => 'Имя каждого артиста обязательно.',
-                'artists.*.name.string' => 'Имя артиста должно быть строкой.',
+                sprintf('%s.required', Fields::ARTISTS)  => 'Укажите хотя бы одного артиста.',
+                sprintf('%s.array', Fields::ARTISTS)  => 'Список артистов должен быть массивом.',
+                sprintf('%s.*.%s.integer', Fields::ARTISTS, Fields::ID) => 'Идентификатор артиста должен быть числом.',
+                sprintf('%s.*.%s.required', Fields::ARTISTS, Fields::NAME)  => 'Имя каждого артиста обязательно.',
+                sprintf('%s.*.%s.string', Fields::ARTISTS, Fields::NAME)  => 'Имя артиста должно быть строкой.',
             ],
         ];
     }

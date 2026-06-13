@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\AddTrack;
 
+use App\Shared\Fields\Fields;
 use App\Enums\SearchTypes;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
@@ -16,21 +17,21 @@ class AddTrackByFileRequest extends AddTrackBaseRequest
     public function rules(): array
     {
         return array_merge(parent::rules(), [
-            'file' => 'required|file|mimes:mp3,flac,wav',
-            'cover' => 'required|file|mimes:jpg,png,webp'
+            Fields::FILE => 'required|file|mimes:mp3,flac,wav',
+            Fields::COVER  => 'required|file|mimes:jpg,png,webp'
         ]);
     }
 
     public function messages()
     {
         $messages = [
-            'file.required' => 'Пожалуйста, загрузите аудиофайл.',
-            'file.file' => 'Файл должен быть корректным.',
-            'file.mimes' => 'Аудиофайл должен быть в формате MP3 или FLAC.',
+            sprintf('%s.required', Fields::FILE) => 'Пожалуйста, загрузите аудиофайл.',
+            sprintf('%s.file', Fields::FILE) => 'Файл должен быть корректным.',
+            sprintf('%s.mimes', Fields::FILE) => 'Аудиофайл должен быть в формате MP3 или FLAC.',
 
-            'cover.required' => 'Пожалуйста, загрузите обложку.',
-            'cover.file' => 'Обложка должна быть файлом.',
-            'cover.mimes' => 'Обложка должна быть в формате JPG или PNG.',
+            sprintf('%s.required', Fields::COVER) => 'Пожалуйста, загрузите обложку.',
+            sprintf('%s.file', Fields::COVER) => 'Обложка должна быть файлом.',
+            sprintf('%s.mimes', Fields::COVER) => 'Обложка должна быть в формате JPG или PNG.',
         ];
 
         $parent = parent::messages();
