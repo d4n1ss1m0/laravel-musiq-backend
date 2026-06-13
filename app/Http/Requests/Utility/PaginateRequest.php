@@ -36,15 +36,15 @@ class PaginateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            sprintf('%s.integer'. Fields::PAGE) => 'Номер страницы должен быть целым числом.',
-            sprintf('%s.min'. Fields::PAGE) => 'Номер страницы должен быть не меньше 1.',
+            sprintf('%s.integer', Fields::PAGE) => 'Номер страницы должен быть целым числом.',
+            sprintf('%s.min', Fields::PAGE) => 'Номер страницы должен быть не меньше 1.',
 
-            sprintf('%s.integer'. Fields::PER_PAGE) => 'Количество элементов на странице должно быть целым числом.',
-            sprintf('%s.min'. Fields::PER_PAGE) => sprintf(
+            sprintf('%s.integer', Fields::PER_PAGE) => 'Количество элементов на странице должно быть целым числом.',
+            sprintf('%s.min', Fields::PER_PAGE) => sprintf(
                 'Количество элементов на странице должно быть не меньше %d.',
                 config('app.per_page_min_default')
             ),
-            sprintf('%s.max'. Fields::PER_PAGE) => sprintf(
+            sprintf('%s.max', Fields::PER_PAGE) => sprintf(
                 'Количество элементов на странице должно быть не больше %d.',
                 config('app.per_page_max_default')
             ),
