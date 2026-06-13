@@ -12,6 +12,7 @@ use App\Http\Requests\AddTrack\AddTrackByFileRequest;
 use App\Http\Requests\AddTrack\AddTrackByLinkRequest;
 use App\Http\Requests\AddTrack\ParseLinkRequest;
 use App\Service\TrackService\TrackServiceInterface;
+use App\Shared\Fields\Fields;
 use App\Shared\Traits\HttpResponse;
 
 class AddTrackController extends Controller
@@ -23,15 +24,15 @@ class AddTrackController extends Controller
         $userId = $request->attributes->get('userId');
 
         $artistArray = [];
-        foreach ($request->get('artists') as $artist) {
-            $artistArray[] = new ArtistDTO($artist['name'], $artist['id'] ?? null);
+        foreach ($request->get(Fields::ARTISTS) as $artist) {
+            $artistArray[] = new ArtistDTO($artist[Fields::NAME], $artist[Fields::ID] ?? null);
         }
 
         $trackDto = new AddTrackDTO(
-            $request->file('file'),
-            $request->input('name'),
+            $request->file(Fields::FILE),
+            $request->input(Fields::NAME),
             $artistArray,
-            $request->file('cover'));
+            $request->file(Fields::COVER));
 
         $trackId = $useCase->addTrackByFile($trackDto, $userId);
 
@@ -40,7 +41,7 @@ class AddTrackController extends Controller
 
     public function parseFromLink(ParseLinkRequest $request, TrackServiceInterface $useCase)
     {
-        $result = $useCase->parseFromUrl($request->input('link'), MusicService::tryFrom($request->input('service')));
+        $result = $useCase->parseFromUrl($request->input(Fields::LINK), MusicService::tryFrom($request->input(Fields::SERVICE)));
         return $this->success($result);
     }
 
@@ -49,22 +50,22 @@ class AddTrackController extends Controller
         $userId = $request->attributes->get('userId');
 
         $artistArray = [];
-        foreach ($request->get('artists') as $artist) {
-            $artistArray[] = new ArtistDTO($artist['name'] ?? null, $artist['id'] ?? null);
+        foreach ($request->get(Fields::ARTISTS) as $artist) {
+            $artistArray[] = new ArtistDTO($artist[Fields::NAME], $artist[Fields::ID] ?? null);
         }
 
         $coverName = null;
         $cover = null;
 
-        if ($request->exists('cover')) {
-            $cover = $request->file('cover');
+        if ($request->exists(Fields::COVER)) {
+            $cover = $request->file(Fields::COVER);
         } else {
-            $coverName = $request->input('coverName');
+            $coverName = $request->input(Fields::COVER_NAME);
         }
 
         $trackDto = new AddTrackLinkDTO(
-            $request->input('file'),
-            $request->input('name'),
+            $request->input(Fields::FILE),
+            $request->input(Fields::NAME),
             $artistArray,
             $cover,
             $coverName
