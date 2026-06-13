@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\MainPage;
 
-
-use App\Enum\Fields\Fields;
+use App\Shared\Fields\Fields;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Utility\PaginateRequest;
 use App\Http\Resources\Tracks\TrackResource;
@@ -43,11 +42,11 @@ class MainPageController extends Controller
 
     public function getRecentlyAddedTracks(PaginateRequest $request) {
         try {
-            $perPage = $request->query(Fields::PerPage->value, config('app.per_page_default'));
+            $perPage = $request->query(Fields::PER_PAGE, config('app.per_page_default'));
             $tracks = $this->recentlyAddedTracksService->getRecently($perPage);
             $keyValueArray = [
-                Fields::ItemsIds->value => array_column($tracks->items(), 'uuid'),
-                Fields::Items->value  => TrackResource::collection($tracks),
+                Fields::ITEMS_IDS => array_column($tracks->items(), 'uuid'),
+                Fields::ITEMS  => TrackResource::collection($tracks),
             ];
 
             return $this->success($this->paginator($keyValueArray, $tracks->total(), $tracks->perPage(), $tracks->currentPage()));

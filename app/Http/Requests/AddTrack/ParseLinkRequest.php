@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\AddTrack;
 
-use App\Enum\Fields\Fields;
+use App\Shared\Fields\Fields;
 use App\Enums\SearchTypes;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,8 +30,8 @@ class ParseLinkRequest extends FormRequest
     public function rules(): array
     {
         return [
-            Fields::Link->value => 'required|string',
-            Fields::Service->value => 'required|string'
+            Fields::LINK => 'required|string',
+            Fields::SERVICE => 'required|string'
         ];
     }
 
@@ -39,11 +39,11 @@ class ParseLinkRequest extends FormRequest
     {
         return [
             'messages' => [
-                sprintf('%s.required', Fields::Link->value) => 'Ссылка обязательна для заполнения.',
-                sprintf('%s.string', Fields::Link->value) => 'Ссылка должна быть строкой.',
+                sprintf('%s.required', Fields::LINK) => 'Ссылка обязательна для заполнения.',
+                sprintf('%s.string', Fields::LINK) => 'Ссылка должна быть строкой.',
 
-                sprintf('%s.required', Fields::Service->value) => 'Сервис обязателен для заполнения.',
-                sprintf('%s.string', Fields::Service->value) => 'Сервис должен быть строкой.',
+                sprintf('%s.required', Fields::SERVICE) => 'Сервис обязателен для заполнения.',
+                sprintf('%s.string', Fields::SERVICE) => 'Сервис должен быть строкой.',
             ],
         ];
     }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Utility;
 
-use App\Enum\Fields\Fields;
+use App\Shared\Fields\Fields;
 use App\Enums\SearchTypes;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,8 +24,8 @@ class PaginateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            Fields::Page->value => 'sometimes|integer|min:1',
-            Fields::PerPage->value => sprintf(
+            Fields::PAGE => 'sometimes|integer|min:1',
+            Fields::PER_PAGE => sprintf(
                 "sometimes|integer|max:%d|min:%d",
                 config('app.per_page_max_default'),
                 config('app.per_page_min_default')
@@ -36,15 +36,15 @@ class PaginateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'page.integer' => 'Номер страницы должен быть целым числом.',
-            'page.min' => 'Номер страницы должен быть не меньше 1.',
+            sprintf('%s.integer'. Fields::PAGE) => 'Номер страницы должен быть целым числом.',
+            sprintf('%s.min'. Fields::PAGE) => 'Номер страницы должен быть не меньше 1.',
 
-            'perPage.integer' => 'Количество элементов на странице должно быть целым числом.',
-            'perPage.min' => sprintf(
+            sprintf('%s.integer'. Fields::PER_PAGE) => 'Количество элементов на странице должно быть целым числом.',
+            sprintf('%s.min'. Fields::PER_PAGE) => sprintf(
                 'Количество элементов на странице должно быть не меньше %d.',
                 config('app.per_page_min_default')
             ),
-            'perPage.max' => sprintf(
+            sprintf('%s.max'. Fields::PER_PAGE) => sprintf(
                 'Количество элементов на странице должно быть не больше %d.',
                 config('app.per_page_max_default')
             ),
