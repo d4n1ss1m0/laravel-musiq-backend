@@ -22,4 +22,11 @@ class TrackController extends Controller
         $tracksResources = TrackResource::collection($tracks);
         return $this->success($tracksResources);
     }
+
+    public function getTrack(Request $request, string $uuid, TrackRepositoryInterface $trackRepository)
+    {
+        $track = $trackRepository->getTrackByUuids([$uuid])[0];
+
+        return $this->success(new TrackResource($track));
+    }
 }

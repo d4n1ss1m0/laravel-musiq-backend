@@ -14,6 +14,7 @@ final class Fields
     public const COVER_NAME = 'coverName';
     public const LINK = 'link';
     public const SERVICE = 'service';
+    public const QUERY = 'query';
 
     // Artist
     public const ARTIST = 'artist';

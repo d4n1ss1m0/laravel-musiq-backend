@@ -61,4 +61,15 @@ class FileService implements FileServiceInterface
             throw new \RuntimeException("Could not move file from {$from} to {$to}");
         }
     }
+
+    public function deleteFile(string $path): void
+    {
+        $disk = Storage::disk('local');
+
+        if (!$disk->exists($path)) {
+            throw new \RuntimeException("File not found: {$path}");
+        }
+
+        $disk->delete($path);
+    }
 }

@@ -1,10 +1,8 @@
 <?php
 
-namespace App\DTO;
+namespace App\DTO\Playlist;
 
-use App\DTO\ArtistDTO;
 use App\Shared\Enums\PlaylistTypes;
-use Illuminate\Http\UploadedFile;
 
 class CreatePlaylistDTO
 {
@@ -13,7 +11,7 @@ class CreatePlaylistDTO
     public array $tracks;
     public PlaylistTypes $type;
 
-    public function __construct(string|null $cover, string $name, PlaylistTypes $type = PlaylistTypes::PUBLIC, array $tracks = [])
+    public function __construct(string|null $cover, string|null $name, PlaylistTypes $type = PlaylistTypes::PUBLIC, array $tracks = [])
     {
         $this->cover = $cover;
         $this->name = $name;

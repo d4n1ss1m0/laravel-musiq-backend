@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\Playlist;
 
+use App\Models\Playlist;
+use App\Rules\CanViewPlaylist;
 use App\Shared\Enums\PlaylistTypes;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreatePlaylistRequest extends FormRequest
+class ImportFromPlaylistRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,16 +25,22 @@ class CreatePlaylistRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => 'sometimes|file|mimes:jpg,png,webp',
-            'name' => 'required|string',
-//            'tracks' => 'required|array',
-            'type' => 'required|string|in:'. implode(',', [PlaylistTypes::PRIVATE->value, PlaylistTypes::PUBLIC->value]),
+            'fromId' => [
+                'required',
+                'uuid',
+                'exists:playlists,uuid',
+                new CanViewPlaylist($this->attributes->get('userId')),
+            ],
         ];
     }
 
     public function messages()
     {
-        return [];
+        return [
+            'fromId.required' => 'Айди обязателен',
+            'fromId.string' => 'Айди строка',
+            'fromId.exists' => 'Плейлиста не существует'
+        ];
     }
 
 }

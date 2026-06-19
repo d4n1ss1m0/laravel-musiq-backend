@@ -5,7 +5,7 @@ namespace App\Http\Requests\Playlist;
 use App\Shared\Enums\PlaylistTypes;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreatePlaylistRequest extends FormRequest
+class UpdatePlaylistRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +24,8 @@ class CreatePlaylistRequest extends FormRequest
     {
         return [
             'file' => 'sometimes|file|mimes:jpg,png,webp',
-            'name' => 'required|string',
-//            'tracks' => 'required|array',
-            'type' => 'required|string|in:'. implode(',', [PlaylistTypes::PRIVATE->value, PlaylistTypes::PUBLIC->value]),
+            'name' => 'sometimes|string',
+            'type' => 'sometimes|string|in:'. implode(',', [PlaylistTypes::PRIVATE->value, PlaylistTypes::PUBLIC->value]),
         ];
     }
 

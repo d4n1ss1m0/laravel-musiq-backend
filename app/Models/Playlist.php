@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class Playlist extends Model
@@ -23,6 +24,15 @@ class Playlist extends Model
         'image',
         'type',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($playlist) {
+            if (!$playlist->id) {
+                $playlist->uuid = (string) Str::uuid7();
+            }
+        });
+    }
 
     public function user()
     {

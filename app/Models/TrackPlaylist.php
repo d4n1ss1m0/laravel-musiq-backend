@@ -23,4 +23,14 @@ class TrackPlaylist extends Model
         'order'
     ];
 
+    public function track()
+    {
+        return $this->belongsTo(Track::class);
+    }
+
+    public function playlist()
+    {
+        return $this->belongsTo(Playlist::class);
+    }
+
 }
