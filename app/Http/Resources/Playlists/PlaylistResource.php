@@ -19,7 +19,7 @@ class PlaylistResource extends JsonResource
     public function toArray(Request $request): array
     {
         return[
-            'id' => $this->id,
+            'id' => $this->uuid,
             'name' => $this->name,
             'image' => $this->image ?'/image/playlist/'.$this->image : '',
             'type' => $this->playlistType->name,

@@ -9,10 +9,11 @@ use App\Models\TrackPlaylist;
 use App\Repositories\Track\TrackRepositoryInterface;
 use App\Shared\Enums\PlaylistTypes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PlaylistRepository implements PlaylistRepositoryInterface
 {
-    public function create(string $name, string $file, int $userId, PlaylistTypes $type = PlaylistTypes::PUBLIC)
+    public function create(string $name, string|null $file, int $userId, PlaylistTypes $type = PlaylistTypes::PUBLIC)
     {
         $typeInt = PlaylistType::where('name', $type->value)->value('id');
 
@@ -38,30 +39,37 @@ class PlaylistRepository implements PlaylistRepositoryInterface
         TrackPlaylist::insert($data);
     }
 
-    public function updateOrder(int $playlistId, array $trackIds) {
-        $values = [];
-        $bindings = [];
+    public function updateOrder(int $playlistId, int $trackId, int $order)
+    {
+        DB::transaction(function () use ($playlistId, $trackId, $order) {
+            $item = TrackPlaylist::query()
+                ->where('playlist_id', $playlistId)
+                ->where('track_id', $trackId)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        foreach ($trackIds as $index => $trackId) {
-            $values[] = '(?, ?)';
-            $bindings[] = $trackId;
-            $bindings[] = $index + 1;
-        }
+            $currentOrder = $item->order;
 
-        $bindings[] = $playlistId;
+            if ($currentOrder === $order) {
+                return;
+            }
 
-        DB::update('
-            UPDATE track_playlists AS tp
-            SET "order" = v.order_value::integer
-            FROM tracks AS t
-            JOIN (VALUES ' . implode(', ', $values) . ') AS v(track_uuid, order_value)
-              ON t.uuid = v.track_uuid::uuid
-            WHERE tp.track_id = t.id
-              AND tp.playlist_id = ?
-            ',
-            $bindings
-        );
+            if ($order < $currentOrder) {
+                TrackPlaylist::query()
+                    ->where('playlist_id', $playlistId)
+                    ->where('order', '>=', $order)
+                    ->where('order', '<', $currentOrder)
+                    ->update(['order' => DB::raw('"order" + 1')]);
+            } else {
+                TrackPlaylist::query()
+                    ->where('playlist_id', $playlistId)
+                    ->where('order', '>', $currentOrder)
+                    ->where('order', '<=', $order)
+                    ->update(['order' => DB::raw('"order" - 1')]);
+            }
 
+            $item->update(['order' => $order]);
+        });
     }
 
     public function removeTracks(int $playlistId, array $tracks = [])
@@ -93,5 +101,23 @@ class PlaylistRepository implements PlaylistRepositoryInterface
                 [$playlistId]
             );
         });
+    }
+
+    public function update(int $playlistId, ?string $name = null, ?string $file = null, ?PlaylistTypes $type = null)
+    {
+        $data = [];
+        if ($name) {
+            $data['name'] = $name;
+        }
+        if ($file) {
+            $data['image'] = $file;
+        }
+        if ($type) {
+            $data['type'] = $type->getId();
+        }
+
+        Playlist::query()
+            ->where('id', $playlistId)
+            ->update($data);
     }
 }

@@ -2,15 +2,20 @@
 
 namespace App\Service\PlaylistService;
 
-use App\DTO\CreatePlaylistDTO;
+use App\DTO\Playlist\CreatePlaylistDTO;
+use App\DTO\Playlist\UpdatePlaylistDTO;
 use App\Models\Playlist;
 
 interface PlaylistServiceInterface
 {
-    public function getPlaylist(int $playlistId, int $userId);
-    public function getTracks(int $playlistId, int $userId);
+    public function getPlaylist(string $playlistId);
+    public function getTracks(string $playlistId, int $perPage, ?string $query = null);
+    public function getQueue(string $playlistId);
     public function createPlaylist(CreatePlaylistDTO $dto, int $userId): Playlist;
-    public function addTrackToPlaylist(int $playlistId, string $trackId) : void;
-    public function removeTrackFromPlaylist(int $playlistId, array $trackId) : void;
-    public function changeOrder(int $playlistId, array $tracks);
+    public function addTrackToPlaylist(string $playlistId, string $trackId) : void;
+    public function removeTrackFromPlaylist(string $playlistId, array $trackId) : void;
+    public function changeOrder(string $playlistId, string $trackId, int $order);
+    public function updatePlaylist(string $playlistId, UpdatePlaylistDTO $dto);
+    public function deletePlaylist(string $playlistId);
+    public function importFromPlaylist(string $fromId, string $toId);
 }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 include __DIR__ . '/MusicStream/api.php';
 
 Route::get('/tracks', [\App\Http\Controllers\Track\TrackController::class, 'getTracks']);
+Route::get('/track/{uuid}', [\App\Http\Controllers\Track\TrackController::class, 'getTrack']);
 
 
 

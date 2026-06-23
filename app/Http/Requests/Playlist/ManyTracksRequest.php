@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\Playlist;
 
+use App\Rules\TrackInPlaylist;
 use App\Shared\Enums\PlaylistTypes;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreatePlaylistRequest extends FormRequest
+class ManyTracksRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,16 +24,22 @@ class CreatePlaylistRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => 'sometimes|file|mimes:jpg,png,webp',
-            'name' => 'required|string',
-//            'tracks' => 'required|array',
-            'type' => 'required|string|in:'. implode(',', [PlaylistTypes::PRIVATE->value, PlaylistTypes::PUBLIC->value]),
-        ];
+            'trackIds' => 'required|array',
+            'trackIds.*' => [
+                'required',
+                'string',
+                'exists:tracks,uuid',
+                new TrackInPlaylist(true, $this->route('uuid'))
+            ],
+            ];
     }
 
     public function messages()
     {
-        return [];
+        return [
+//            'trackId.required' => 'Айди трека обязателен',
+//            'trackId.string' => 'Айди трека должно быть строкой'
+        ];
     }
 
 }

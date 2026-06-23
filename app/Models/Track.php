@@ -20,7 +20,7 @@ class Track extends Model
     {
         static::creating(function ($track) {
             if (!$track->id) {
-                $track->uuid = (string) Str::uuid();
+                $track->uuid = (string) Str::uuid7();
             }
         });
     }
@@ -37,6 +37,11 @@ class Track extends Model
 
     public function artists() {
         return $this->belongsToMany(Artist::class, 'track_artists')->orderByPivot('id');
+    }
+
+    public function playlists()
+    {
+        return $this->belongsToMany(Playlist::class, 'track_playlists');
     }
 
 
