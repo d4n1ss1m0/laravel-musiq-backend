@@ -28,7 +28,7 @@ class FileService implements FileServiceInterface
             $outputFile = storage_path('app/audio') . '/' . $hash . '.ogg';
 
             $command = sprintf(
-                'ffmpeg -i %s -c:a libvorbis -q:a 5 -ar 48000 %s 2>&1',
+                'ffmpeg -i %s -map 0:a:0 -vn -c:a libvorbis -q:a 5 -ar 48000 %s 2>&1',
                 escapeshellarg($path),
                 escapeshellarg($outputFile)
             );
