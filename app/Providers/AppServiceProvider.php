@@ -21,6 +21,8 @@ use App\Service\MainPage\RecentlyPlayedPlaylists\RecentlyPlayedPlaylistsService;
 use App\Service\MainPage\RecentlyPlayedPlaylists\RecentlyPlayedPlaylistsServiceInterface;
 use App\Service\MainPage\RecentlyPlayedTracks\RecentlyPlayedTracksService;
 use App\Service\MainPage\RecentlyPlayedTracks\RecentlyPlayedTracksServiceInterface;
+use App\Service\MediatekaService\MediatekaService;
+use App\Service\MediatekaService\MediatekaServiceInterface;
 use App\Service\MusicStream\MusicStreamService;
 use App\Service\MusicStream\MusicStreamServiceInterface;
 use App\Repositories\Artist\ArtistRepository;
@@ -48,6 +50,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RecentlyAddedTracksServiceInterface::class, RecentlyAddedTracksService::class);
         $this->app->bind(RecentlyPlayedPlaylistsServiceInterface::class, RecentlyPlayedPlaylistsService::class);
         $this->app->bind(RecentlyPlayedTracksServiceInterface::class, RecentlyPlayedTracksService::class);
+        $this->app->bind(MediatekaServiceInterface::class, MediatekaService::class);
 
         //Repositories
         $this->app->bind(ArtistRepositoryInterface::class, ArtistRepository::class);
