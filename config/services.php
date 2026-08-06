@@ -37,6 +37,10 @@ return [
 
     'musiq_downloader' => [
         'binary' => env('MUSIQ_DOWNLOADER_BINARY', '/usr/local/bin/musiq-downloader'),
-    ]
+    ],
+
+    'history_service' => [
+        'play_cooldown' => env('PLAY_COOLDOWN', 1)
+    ],
 
 ];
