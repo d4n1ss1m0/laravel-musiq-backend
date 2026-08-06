@@ -29,6 +29,10 @@ final class Fields
     public const ITEMS = 'items';
     public const ITEMS_IDS = 'itemsIds';
 
+    //History
+    public const SOURCE = 'source';
+    public const SOURCE_ID = 'source_id';
+
     private function __construct()
     {
     }

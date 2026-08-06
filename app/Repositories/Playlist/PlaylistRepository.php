@@ -13,6 +13,13 @@ use Illuminate\Support\Str;
 
 class PlaylistRepository implements PlaylistRepositoryInterface
 {
+    public function getByUUID(string $uuid): ?Playlist
+    {
+        return Playlist::query()
+            ->where('uuid', $uuid)
+            ->first();
+    }
+
     public function create(string $name, string|null $file, int $userId, PlaylistTypes $type = PlaylistTypes::PUBLIC)
     {
         $typeInt = PlaylistType::where('name', $type->value)->value('id');

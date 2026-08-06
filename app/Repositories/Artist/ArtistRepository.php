@@ -14,4 +14,11 @@ class ArtistRepository implements ArtistRepositoryInterface
             'image' => $image
         ]);
     }
+
+    public function getByUUID(string $uuid): ?Artist
+    {
+        return Artist::query()
+            ->where('uuid', $uuid)
+            ->first();
+    }
 }

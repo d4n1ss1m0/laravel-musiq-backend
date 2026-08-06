@@ -8,6 +8,7 @@ use App\DTO\Playlist\UpdatePlaylistDTO;
 use App\Models\Playlist;
 use App\Models\Track;
 use App\Models\TrackPlaylist;
+use App\Repositories\Mediateka\MediatekaRepositoryInterface;
 use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Service\FileService\FileServiceInterface;
 use App\Service\TrackService\TrackServiceInterface;
@@ -17,7 +18,11 @@ use Illuminate\Support\Facades\DB;
 
 class PlaylistService implements PlaylistServiceInterface
 {
-    public function __construct(private readonly PlaylistRepositoryInterface $repository, private readonly FileServiceInterface $imageService, private readonly TrackServiceInterface $trackService)
+    public function __construct(
+        private readonly PlaylistRepositoryInterface $repository,
+        private readonly MediatekaRepositoryInterface $mediatekaRepository,
+        private readonly FileServiceInterface $imageService,
+        private readonly TrackServiceInterface $trackService)
     {
     }
 
@@ -80,6 +85,7 @@ class PlaylistService implements PlaylistServiceInterface
     public function createPlaylist(CreatePlaylistDTO $dto, int $userId): Playlist
     {
         $playlist = $this->repository->create($dto->name, $dto->cover, $userId, $dto->type);
+        $this->mediatekaRepository->addMedia($playlist, $userId);
         return $playlist;
     }
 
