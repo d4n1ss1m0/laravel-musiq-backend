@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 
+use App\Repositories\History\HistoryRepository;
+use App\Repositories\History\HistoryRepositoryInterface;
 use App\Repositories\Playlist\PlaylistRepository;
 use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Repositories\RecentlyPlayedTrack\RecentlyPlayedTrackRepository;
@@ -11,6 +13,8 @@ use App\Service\AuthService\AuthService;
 use App\Service\AuthService\AuthServiceInterface;
 use App\Service\FileService\FileService;
 use App\Service\FileService\FileServiceInterface;
+use App\Service\HistoryService\HistoryService;
+use App\Service\HistoryService\HistoryServiceInterface;
 use App\Service\ImageService\ImageService;
 use App\Service\ImageService\ImageServiceInterface;
 use App\Service\JwtService\JwtService;
@@ -48,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RecentlyAddedTracksServiceInterface::class, RecentlyAddedTracksService::class);
         $this->app->bind(RecentlyPlayedPlaylistsServiceInterface::class, RecentlyPlayedPlaylistsService::class);
         $this->app->bind(RecentlyPlayedTracksServiceInterface::class, RecentlyPlayedTracksService::class);
+        $this->app->bind(HistoryServiceInterface::class, HistoryService::class);
 
         //Repositories
         $this->app->bind(ArtistRepositoryInterface::class, ArtistRepository::class);
@@ -55,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(RecentlyPlayedTrackRepositoryInterface::class, RecentlyPlayedTrackRepository::class);
         $this->app->bind(PlaylistRepositoryInterface::class, PlaylistRepository::class);
+        $this->app->bind(HistoryRepositoryInterface::class, HistoryRepository::class);
 
         //Infrastructure
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
