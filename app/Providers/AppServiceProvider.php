@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 
+use App\Repositories\Mediateka\MediatekaRepository;
+use App\Repositories\Mediateka\MediatekaRepositoryInterface;
 use App\Repositories\Playlist\PlaylistRepository;
 use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Repositories\RecentlyPlayedTrack\RecentlyPlayedTrackRepository;
@@ -21,6 +23,8 @@ use App\Service\MainPage\RecentlyPlayedPlaylists\RecentlyPlayedPlaylistsService;
 use App\Service\MainPage\RecentlyPlayedPlaylists\RecentlyPlayedPlaylistsServiceInterface;
 use App\Service\MainPage\RecentlyPlayedTracks\RecentlyPlayedTracksService;
 use App\Service\MainPage\RecentlyPlayedTracks\RecentlyPlayedTracksServiceInterface;
+use App\Service\MediatekaService\MediatekaService;
+use App\Service\MediatekaService\MediatekaServiceInterface;
 use App\Service\MusicStream\MusicStreamService;
 use App\Service\MusicStream\MusicStreamServiceInterface;
 use App\Repositories\Artist\ArtistRepository;
@@ -48,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RecentlyAddedTracksServiceInterface::class, RecentlyAddedTracksService::class);
         $this->app->bind(RecentlyPlayedPlaylistsServiceInterface::class, RecentlyPlayedPlaylistsService::class);
         $this->app->bind(RecentlyPlayedTracksServiceInterface::class, RecentlyPlayedTracksService::class);
+        $this->app->bind(MediatekaServiceInterface::class, MediatekaService::class);
 
         //Repositories
         $this->app->bind(ArtistRepositoryInterface::class, ArtistRepository::class);
@@ -55,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(RecentlyPlayedTrackRepositoryInterface::class, RecentlyPlayedTrackRepository::class);
         $this->app->bind(PlaylistRepositoryInterface::class, PlaylistRepository::class);
+        $this->app->bind(MediatekaRepositoryInterface::class, MediatekaRepository::class);
 
         //Infrastructure
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
