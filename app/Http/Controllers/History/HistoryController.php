@@ -28,7 +28,7 @@ class HistoryController extends Controller
             $source = HistorySource::tryFrom($sourceString);
             $trackId = $request->input(Fields::ID);
             $sourceId = $request->input(Fields::SOURCE_ID);
-            dd($source);
+
             $this->historyService->store($userId, $trackId, $sourceId, $source);
 
             return $this->success('success');
