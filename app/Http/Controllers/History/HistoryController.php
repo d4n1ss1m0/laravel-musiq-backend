@@ -5,6 +5,7 @@ namespace App\Http\Controllers\History;
 use App\DTO\History\HistoryItemDTO;
 use App\Enum\HistorySource;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\History\AddToHistoryRequest;
 use App\Service\AuthService\AuthServiceInterface;
 use App\Service\HistoryService\HistoryServiceInterface;
 use App\Shared\Fields\Fields;
@@ -19,7 +20,7 @@ class HistoryController extends Controller
     {
     }
 
-    public function store(Request $request)
+    public function store(AddToHistoryRequest $request)
     {
         try {
             $userId = $request->attributes->get('userId');
