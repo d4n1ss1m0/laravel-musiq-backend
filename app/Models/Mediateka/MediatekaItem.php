@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Mediateka;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Auth\User;

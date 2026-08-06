@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Contracts\MediatekaLibraryable;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
-class Playlist extends Model
+class Playlist extends Model implements MediatekaLibraryable
 {
     use HasFactory;
 

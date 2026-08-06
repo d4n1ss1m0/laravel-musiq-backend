@@ -2,13 +2,29 @@
 
 namespace App\Service\MediatekaService;
 
+use App\Contracts\MediatekaLibraryable;
+use App\Enum\MediatekaItemType;
 use App\Enum\OrderBy;
 use App\Models\Artist;
-use App\Models\MediatekaItem;
+use App\Models\Mediateka\MediatekaItem;
 use App\Models\Playlist;
+use App\Repositories\Artist\ArtistRepositoryInterface;
+use App\Repositories\Mediateka\MediatekaRepositoryInterface;
+use App\Repositories\Playlist\PlaylistRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class MediatekaService implements MediatekaServiceInterface
 {
+
+    const MAX_PIN = 5;
+
+    public function __construct(
+        private readonly MediatekaRepositoryInterface $repository,
+        private readonly ArtistRepositoryInterface $artistRepository,
+        private readonly PlaylistRepositoryInterface $playlistRepository,
+    )
+    {
+    }
 
     public function getMediateka(int $userId, OrderBy $orderBy = OrderBy::RECENT, string $query = '')
     {
@@ -33,14 +49,90 @@ class MediatekaService implements MediatekaServiceInterface
         return $mediatekaQuery->get();
     }
 
-    public function addPlaylist(int $userId, int $playlistId)
+    public function addMedia(MediatekaItemType $mediatekaType, string $mediaId, int $userId)
     {
-        $playlist = Playlist::query()->findOrFail($playlistId);
+        DB::transaction(function () use ($userId, $mediaId, $mediatekaType) {
+            $mediatekaItem = $this->repository->getMediatekaItem(
+                $mediatekaType,
+                $mediaId,
+                $userId
+            );
 
-        return MediatekaItem::query()->firstOrCreate([
-            'user_id' => $userId,
-            'libraryable_type' => $playlist->getMorphClass(),
-            'libraryable_id' => $playlist->id,
-        ]);
+            if ($mediatekaItem) {
+                throw new \Exception('This media already in mediateka');
+            }
+
+            $media = $this->getLibraryableByUUID($mediatekaType, $mediaId);
+            if (!$media) {
+                throw new \Exception('Media not found');
+            }
+
+            $this->repository->addMedia($media, $userId);
+        });
+    }
+
+    public function removeMedia(MediatekaItemType $mediatekaType, string $mediaId, int $userId)
+    {
+        DB::transaction(function () use ($userId, $mediaId, $mediatekaType) {
+            $mediatekaItem = $this->repository->getMediatekaItem(
+                $mediatekaType,
+                $mediaId,
+                $userId
+            );
+
+            if (!$mediatekaItem) {
+                throw new \Exception('This media not in mediateka');
+            }
+
+            $this->repository->removeMedia($mediatekaItem->libraryable, $userId);
+        });
+    }
+
+    private function getLibraryableByUUID(MediatekaItemType $mediatekaType, string $uuid): ?MediatekaLibraryable
+    {
+        return match ($mediatekaType) {
+            MediatekaItemType::ARTIST => $this->artistRepository->getByUUID($uuid),
+            MediatekaItemType::PLAYLIST => $this->playlistRepository->getByUUID($uuid),
+        };
+    }
+
+    public function pinMedia(MediatekaItemType $mediatekaType, string $mediaId, int $userId)
+    {
+        DB::transaction(function () use ($userId, $mediatekaType, $mediaId) {
+            $maxPin = $this->repository->getMaxPinValue($userId);
+
+            if ($maxPin == self::MAX_PIN) {
+                throw new \Exception('Maximum number of pins reached');
+            }
+
+            $mediatekaItem = $this->repository->getMediatekaItem($mediatekaType, $mediaId, $userId);
+
+            if (!$mediatekaItem) {
+                throw new \Exception('Media not found in mediateka');
+            }
+
+            if ($mediatekaItem->isPinned()) {
+                throw new \Exception('This media is already pinned');
+            }
+
+            $this->repository->pinItem($mediatekaItem, ++$maxPin);
+        });
+    }
+
+    public function unpinMedia(MediatekaItemType $mediatekaType, string $mediaId, int $userId)
+    {
+        DB::transaction(function () use ($userId, $mediatekaType, $mediaId) {
+            $mediatekaItem = $this->repository->getMediatekaItem($mediatekaType, $mediaId, $userId);
+
+            if (!$mediatekaItem) {
+                throw new \Exception('Media not found in mediateka');
+            }
+
+            if (!$mediatekaItem->isPinned()) {
+                throw new \Exception('This media is not pinned');
+            }
+
+            $this->repository->unpinItem($mediatekaItem);
+        });
     }
 }

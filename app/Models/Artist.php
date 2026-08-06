@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Contracts\MediatekaLibraryable;
 use App\Models\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
-class Artist extends Model
+class Artist extends Model implements MediatekaLibraryable
 {
     use HasFactory;
 
@@ -20,7 +21,17 @@ class Artist extends Model
     protected $fillable = [
         'name',
         'image',
+        'uuid',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($artist) {
+            if (!$artist->uuid) {
+                $artist->uuid = (string) Str::uuid7();
+            }
+        });
+    }
 
     public function tracks() {
         return $this->belongsToMany(Track::class, 'track_artists');

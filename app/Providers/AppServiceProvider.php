@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 
+use App\Repositories\Mediateka\MediatekaRepository;
+use App\Repositories\Mediateka\MediatekaRepositoryInterface;
 use App\Repositories\Playlist\PlaylistRepository;
 use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Repositories\RecentlyPlayedTrack\RecentlyPlayedTrackRepository;
@@ -58,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(RecentlyPlayedTrackRepositoryInterface::class, RecentlyPlayedTrackRepository::class);
         $this->app->bind(PlaylistRepositoryInterface::class, PlaylistRepository::class);
+        $this->app->bind(MediatekaRepositoryInterface::class, MediatekaRepository::class);
 
         //Infrastructure
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
