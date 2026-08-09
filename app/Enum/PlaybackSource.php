@@ -21,4 +21,13 @@ enum PlaybackSource: string
             self::TRACK => Track::class,
         };
     }
+
+    public static function getByClassName($className) {
+        return match ($className) {
+            Playlist::class => self::PLAYLIST,
+            Artist::class => self::ARTIST,
+            Track::class => self::TRACK,
+            default => null,
+        };
+    }
 }

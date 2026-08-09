@@ -25,4 +25,6 @@ interface PlaybackRepositoryInterface
     ): PlaybackSession;
 
     public function addSourceTracks(int $playbackSessionId, Collection $tracks): void;
+
+    public function getByUserId(int $userId): PlaybackSession|null;
 }

@@ -29,7 +29,7 @@ use Illuminate\Support\Carbon;
  * @property-read User $user
  * @property-read Model|null $source
  * @property-read Track|null $currentTrack
- * @property-read Collection<int, PlaybackSessionTrack> $sessionTracks
+ * @property Collection<int, PlaybackSessionTrack> $sessionTracks
  * @property-read Collection<int, PlaybackManualQueueItem> $manualQueueItems
  */
 class PlaybackSession extends Model
@@ -80,5 +80,41 @@ class PlaybackSession extends Model
         return $this->hasMany(PlaybackManualQueueItem::class, 'session_id')
             ->orderBy('placement')
             ->orderBy('position');
+    }
+
+    public function nextQueueItem(): ?PlaybackSessionTrack
+    {
+        $tracks = $this->sessionTracks;
+
+        $nextTrack = $tracks
+            ->where('playback_position', '>', $this->current_position)
+            ->sortBy('playback_position')
+            ->first();
+
+        if (!$nextTrack && $this->repeat_mode === RepeatType::QUEUE) {
+            return $tracks
+                ->sortBy('playback_position')
+                ->first();
+        }
+
+        return $nextTrack;
+    }
+
+    public function previousQueueItem(): ?PlaybackSessionTrack
+    {
+        $tracks = $this->sessionTracks;
+
+        $previousTrack = $tracks
+            ->where('playback_position', '<', $this->current_position)
+            ->sortByDesc('playback_position')
+            ->first();
+
+        if (!$previousTrack && $this->repeat_mode === RepeatType::QUEUE) {
+            return $tracks
+                ->sortByDesc('playback_position')
+                ->first();
+        }
+
+        return $previousTrack;
     }
 }

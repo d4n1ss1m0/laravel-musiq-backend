@@ -15,6 +15,7 @@ final class Fields
     public const LINK = 'link';
     public const SERVICE = 'service';
     public const QUERY = 'query';
+    public const USER_ID = 'userId';
 
     // Artist
     public const ARTIST = 'artist';

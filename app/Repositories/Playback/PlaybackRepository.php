@@ -58,4 +58,11 @@ class PlaybackRepository implements PlaybackRepositoryInterface
 
         PlaybackSessionTrack::query()->insert($insertData);
     }
+
+    public function getByUserId(int $userId): PlaybackSession|null
+    {
+        return PlaybackSession::query()
+            ->where('user_id', $userId)
+            ->first();
+    }
 }
