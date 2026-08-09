@@ -5,7 +5,16 @@ namespace App\Models\PlaybackSession;
 use App\Models\Track;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $session_id
+ * @property int $track_id
+ * @property int $source_position
+ * @property int $playback_position
+ * @property-read PlaybackSession $session
+ * @property-read Track $track
+ */
 class PlaybackSessionTrack extends Model
 {
     use HasFactory;
@@ -28,12 +37,12 @@ class PlaybackSessionTrack extends Model
         'playback_position' => 'integer',
     ];
 
-    public function session()
+    public function session(): BelongsTo
     {
         return $this->belongsTo(PlaybackSession::class, 'session_id');
     }
 
-    public function track()
+    public function track(): BelongsTo
     {
         return $this->belongsTo(Track::class);
     }

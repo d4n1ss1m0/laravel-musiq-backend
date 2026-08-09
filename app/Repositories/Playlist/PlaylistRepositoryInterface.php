@@ -6,6 +6,7 @@ namespace App\Repositories\Playlist;
 
 use App\Models\Playlist;
 use App\Shared\Enums\PlaylistTypes;
+use Illuminate\Support\Collection;
 
 interface PlaylistRepositoryInterface
 {
@@ -17,4 +18,6 @@ interface PlaylistRepositoryInterface
     public function removeTracks(int $playlistId, array $tracks = []);
 
     public function updateOrder(int $playlistId, int $trackId, int $order);
+
+    public function getPlaylistTracks(string $uuid): Collection;
 }

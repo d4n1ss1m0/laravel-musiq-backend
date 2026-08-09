@@ -2,10 +2,20 @@
 
 namespace App\Models\PlaybackSession;
 
+use App\Enum\PlaybackManualType;
 use App\Models\Track;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $session_id
+ * @property int $track_id
+ * @property PlaybackManualType $placement
+ * @property int $position
+ * @property-read PlaybackSession $session
+ * @property-read Track $track
+ */
 class PlaybackManualQueueItem extends Model
 {
     use HasFactory;
@@ -20,21 +30,24 @@ class PlaybackManualQueueItem extends Model
         'session_id',
         'track_id',
         'placement',
-        'position',
+        'source_position',
+        'playback_position',
     ];
 
     protected $casts = [
         'session_id' => 'integer',
         'track_id' => 'integer',
-        'position' => 'integer',
+        'source_position' => 'integer',
+        'playback_position' => 'integer',
+        'placement' => PlaybackManualType::class,
     ];
 
-    public function session()
+    public function session(): BelongsTo
     {
         return $this->belongsTo(PlaybackSession::class, 'session_id');
     }
 
-    public function track()
+    public function track(): BelongsTo
     {
         return $this->belongsTo(Track::class);
     }

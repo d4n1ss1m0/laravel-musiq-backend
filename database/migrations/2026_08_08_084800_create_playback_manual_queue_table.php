@@ -19,9 +19,10 @@ return new class extends Migration
                 ->constrained('tracks')
                 ->cascadeOnDelete();
             $table->enum('placement', ['next', 'tail']);
-            $table->unsignedBigInteger('position');
+            $table->unsignedBigInteger('source_position');
+            $table->unsignedBigInteger('playback_position');
 
-            $table->primary(['session_id', 'placement', 'position']);
+            $table->primary(['session_id', 'placement', 'source_position']);
         });
     }
 
