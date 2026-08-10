@@ -19,6 +19,16 @@ jobs:
           cd /var/www/musiq
           composer install --no-dev --optimize-autoloader
 
+      - name: Clear cached bootstrap files
+        run: |
+          cd /var/www/musiq
+          php artisan optimize:clear
+
+      - name: Generate Swagger docs
+        run: |
+          cd /var/www/musiq
+          php artisan l5-swagger:generate
+
       - name: Run migrations
         run: |
           cd /var/www/musiq
@@ -32,4 +42,4 @@ jobs:
           php artisan view:cache
 
       - name: Restart PHP-FPM
-        run: sudo systemctl restart php8.3-fpm
+        run: sudo systemctl restart php8.4-fpm
