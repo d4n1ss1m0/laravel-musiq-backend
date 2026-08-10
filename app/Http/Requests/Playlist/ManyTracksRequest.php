@@ -4,6 +4,7 @@ namespace App\Http\Requests\Playlist;
 
 use App\Rules\TrackInPlaylist;
 use App\Shared\Enums\PlaylistTypes;
+use App\Shared\Fields\Fields;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ManyTracksRequest extends FormRequest
@@ -24,8 +25,8 @@ class ManyTracksRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'trackIds' => 'required|array',
-            'trackIds.*' => [
+            Fields::IDS => 'required|array',
+            Fields::IDS.'.*' => [
                 'required',
                 'string',
                 'exists:tracks,uuid',

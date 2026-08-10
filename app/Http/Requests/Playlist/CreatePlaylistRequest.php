@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Playlist;
 
 use App\Shared\Enums\PlaylistTypes;
+use App\Shared\Fields\Fields;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreatePlaylistRequest extends FormRequest
@@ -23,10 +24,10 @@ class CreatePlaylistRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => 'sometimes|file|mimes:jpg,png,webp',
-            'name' => 'required|string',
+            Fields::FILE => 'sometimes|file|mimes:jpg,png,webp',
+            Fields::NAME => 'required|string',
 //            'tracks' => 'required|array',
-            'type' => 'required|string|in:'. implode(',', [PlaylistTypes::PRIVATE->value, PlaylistTypes::PUBLIC->value]),
+            Fields::TYPE => 'required|string|in:'. implode(',', [PlaylistTypes::PRIVATE->value, PlaylistTypes::PUBLIC->value]),
         ];
     }
 

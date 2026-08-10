@@ -12,7 +12,7 @@ interface PlaylistServiceInterface
     public function getTracks(string $playlistId, int $perPage, ?string $query = null);
     public function getQueue(string $playlistId);
     public function createPlaylist(CreatePlaylistDTO $dto, int $userId): Playlist;
-    public function addTrackToPlaylist(string $playlistId, string $trackId) : void;
+    public function addTrackToPlaylist(string $playlistId, array $trackIds) : void;
     public function removeTrackFromPlaylist(string $playlistId, array $trackId) : void;
     public function changeOrder(string $playlistId, string $trackId, int $order);
     public function updatePlaylist(string $playlistId, UpdatePlaylistDTO $dto);
