@@ -5,6 +5,7 @@ namespace App\Http\Requests\Playlist;
 use App\Models\Playlist;
 use App\Rules\CanViewPlaylist;
 use App\Shared\Enums\PlaylistTypes;
+use App\Shared\Fields\Fields;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ImportFromPlaylistRequest extends FormRequest
@@ -25,7 +26,7 @@ class ImportFromPlaylistRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fromId' => [
+            Fields::ID => [
                 'required',
                 'uuid',
                 'exists:playlists,uuid',
@@ -37,9 +38,9 @@ class ImportFromPlaylistRequest extends FormRequest
     public function messages()
     {
         return [
-            'fromId.required' => 'Айди обязателен',
-            'fromId.string' => 'Айди строка',
-            'fromId.exists' => 'Плейлиста не существует'
+            sprintf('%s.required', Fields::ID) => 'Айди обязателен',
+            sprintf('%s.string', Fields::ID) => 'Айди строка',
+            sprintf('%s.exists', Fields::ID) => 'Плейлиста не существует'
         ];
     }
 

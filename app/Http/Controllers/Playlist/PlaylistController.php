@@ -84,13 +84,13 @@ class PlaylistController extends Controller
     {
         $userId = $request->get('userId');
         try {
-            if ($request->file) {
-                $cover = $this->fileService->addFile($request->file, 'image/playlist', 'webp');
+            if ($request->hasFile(Fields::FILE)) {
+                $cover = $this->fileService->addFile($request->file(Fields::FILE), 'image/playlist', 'webp');
             }
 
             $dto = new CreatePlaylistDTO($cover ?? null,
-                $request->name,
-                PlaylistTypes::tryFrom($request->type)
+                $request->input(Fields::NAME),
+                PlaylistTypes::tryFrom($request->input(Fields::TYPE))
             );
 
             $playlist = $this->playlistService->createPlaylist($dto, $userId);
@@ -104,8 +104,8 @@ class PlaylistController extends Controller
     public function addTrack(string $playlistId, AddTrackToPlaylistRequest $request)
     {
         try {
-            $this->playlistService->addTrackToPlaylist($playlistId, $request->trackId);
-            return $this->success(['message' => 'Track added', 'playlistId' => $playlistId, 'trackId' => $request->trackId]);
+            $this->playlistService->addTrackToPlaylist($playlistId, $request->input(Fields::IDS));
+            return $this->success(['message' => 'Track added', 'playlistId' => $playlistId, 'tracksIds' => $request->input(Fields::IDS)]);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 'error', $e->getCode());
         }
@@ -114,7 +114,7 @@ class PlaylistController extends Controller
     public function removeTrack(string $playlistId, ManyTracksRequest $request)
     {
         try {
-            $this->playlistService->removeTrackFromPlaylist($playlistId, $request->trackIds);
+            $this->playlistService->removeTrackFromPlaylist($playlistId, $request->input(Fields::IDS));
             return $this->success(['message' => 'Track removed']);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 'error', $e->getCode());
@@ -125,7 +125,7 @@ class PlaylistController extends Controller
     public function order(string $playlistId, ChangeTrackOrderRequest $request)
     {
         try {
-            $this->playlistService->changeOrder($playlistId, $request->trackId, $request->order);
+            $this->playlistService->changeOrder($playlistId, $request->input(Fields::ID), $request->input(Fields::ORDER));
             return $this->success(['message' => 'Order changed']);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 'error', $e->getCode());
@@ -135,13 +135,13 @@ class PlaylistController extends Controller
     public function update(string $playlistId, UpdatePlaylistRequest $request)
     {
         try {
-            if ($request->file) {
-                $path = $this->fileService->addFile($request->file, 'image/playlist', 'webp');
+            if ($request->hasFile(Fields::FILE)) {
+                $path = $this->fileService->addFile($request->file(Fields::FILE), 'image/playlist', 'webp');
             }
             $playlistDTO = new UpdatePlaylistDTO(
                 $path ?? null,
-                $request->name,
-                $request->type ? PlaylistTypes::tryFrom($request->type) : null
+                $request->input(Fields::NAME),
+                $request->input(Fields::TYPE)? PlaylistTypes::tryFrom($request->input(Fields::TYPE)) : null
             );
             $this->playlistService->updatePlaylist($playlistId, $playlistDTO);
             return $this->success(['message' => 'Playlist updated']);
@@ -163,7 +163,7 @@ class PlaylistController extends Controller
     public function importFromPlaylist(string $playlistId, ImportFromPlaylistRequest $request)
     {
         try {
-            $this->playlistService->importFromPlaylist($request->input('fromId'), $playlistId);
+            $this->playlistService->importFromPlaylist($request->input(Fields::ID), $playlistId);
             return $this->success(['message' => 'Playlist imported']);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 'error', $e->getCode());
