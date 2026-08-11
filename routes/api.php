@@ -13,5 +13,6 @@ include __DIR__ . '/Search/api.php';
 include __DIR__ . '/AddFile/api.php';
 include __DIR__ . '/personal/api.php';
 include __DIR__ . '/Mediateka/api.php';
+include __DIR__ . '/History/api.php';
 include __DIR__ . '/Playback/api.php';
 

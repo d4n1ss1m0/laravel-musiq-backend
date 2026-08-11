@@ -16,6 +16,8 @@ final class Fields
     public const SERVICE = 'service';
     public const QUERY = 'query';
     public const USER_ID = 'userId';
+    public const TYPE = 'type';
+    public const ORDER = 'order';
 
     // Artist
     public const ARTIST = 'artist';
@@ -29,6 +31,10 @@ final class Fields
     public const PER_PAGE = 'limit';
     public const ITEMS = 'items';
     public const ITEMS_IDS = 'itemsIds';
+
+    //History
+    public const SOURCE = 'source';
+    public const SOURCE_ID = 'source_id';
 
     private function __construct()
     {

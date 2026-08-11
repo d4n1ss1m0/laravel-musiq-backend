@@ -32,8 +32,17 @@ class AddTrackBaseRequest extends FormRequest
         return [
             Fields::NAME => 'required|string',
             Fields::ARTISTS => 'required|array',
-            sprintf('%s.*.%s', Fields::ARTISTS, Fields::ID) => 'nullable|integer',
-            sprintf('%s.*.%s', Fields::ARTISTS, Fields::NAME) => 'required_without:artists.*.id|string',
+            sprintf('%s.*.%s', Fields::ARTISTS, Fields::ID) => [
+                'nullable',
+                'string',
+                'exists:artists,uuid',
+                sprintf('required_without:%s.*.%s', Fields::ARTISTS, Fields::NAME),
+            ],
+            sprintf('%s.*.%s', Fields::ARTISTS, Fields::NAME) => [
+                'nullable',
+                'string',
+                sprintf('required_without:%s.*.%s', Fields::ARTISTS, Fields::ID),
+            ],
         ];
     }
 
@@ -46,7 +55,7 @@ class AddTrackBaseRequest extends FormRequest
 
                 sprintf('%s.required', Fields::ARTISTS)  => 'Укажите хотя бы одного артиста.',
                 sprintf('%s.array', Fields::ARTISTS)  => 'Список артистов должен быть массивом.',
-                sprintf('%s.*.%s.integer', Fields::ARTISTS, Fields::ID) => 'Идентификатор артиста должен быть числом.',
+                sprintf('%s.*.%s.string', Fields::ARTISTS, Fields::ID) => 'Идентификатор артиста должен быть строкой.',
                 sprintf('%s.*.%s.required', Fields::ARTISTS, Fields::NAME)  => 'Имя каждого артиста обязательно.',
                 sprintf('%s.*.%s.string', Fields::ARTISTS, Fields::NAME)  => 'Имя артиста должно быть строкой.',
             ],

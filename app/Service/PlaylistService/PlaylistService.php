@@ -89,18 +89,22 @@ class PlaylistService implements PlaylistServiceInterface
         return $playlist;
     }
 
-    public function addTrackToPlaylist(string $playlistId, string $trackId): void
+    public function addTrackToPlaylist(string $playlistId, array $trackIds): void
     {
-        DB::transaction(function () use ($playlistId, $trackId) {
+        DB::transaction(function () use ($playlistId, $trackIds) {
             $playlistIntId = Playlist::query()->where('uuid', $playlistId)->value('id');
             TrackPlaylist::query()
                 ->where('playlist_id', $playlistIntId)
                 ->lockForUpdate()
                 ->get();
             $lastOrder = TrackPlaylist::where('playlist_id', $playlistIntId)->max('order') ?? 0;
-            $track = Track::query()->where('uuid', $trackId)->firstOrFail('id');
+            $tracksArray = Track::query()->whereIn('uuid', $trackIds)->get(['id', 'uuid'])->keyBy('uuid')->toArray();
             $tracks = [];
-            $tracks[] = new PlaylistTrackDTO((int)$track->id, $lastOrder + 1);
+            foreach ($trackIds as $trackId) {
+               $track = $tracksArray[$trackId] ?? null;
+               $tracks[] = new PlaylistTrackDTO((int)$track['id'], ++$lastOrder);
+            }
+
             $this->repository->addTracks($playlistIntId, $tracks);
         });
     }

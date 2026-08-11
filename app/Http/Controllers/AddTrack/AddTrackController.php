@@ -25,7 +25,7 @@ class AddTrackController extends Controller
 
         $artistArray = [];
         foreach ($request->get(Fields::ARTISTS) as $artist) {
-            $artistArray[] = new ArtistDTO($artist[Fields::NAME], $artist[Fields::ID] ?? null);
+            $artistArray[] = new ArtistDTO($artist[Fields::NAME] ?? null, $artist[Fields::ID] ?? null);
         }
 
         $trackDto = new AddTrackDTO(
@@ -51,7 +51,7 @@ class AddTrackController extends Controller
 
         $artistArray = [];
         foreach ($request->get(Fields::ARTISTS) as $artist) {
-            $artistArray[] = new ArtistDTO($artist[Fields::NAME], $artist[Fields::ID] ?? null);
+            $artistArray[] = new ArtistDTO($artist[Fields::NAME] ?? null, $artist[Fields::ID] ?? null);
         }
 
         $coverName = null;
