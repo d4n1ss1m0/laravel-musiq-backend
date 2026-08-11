@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Artist;
 
-use App\Http\Requests\Utility\SearchPaginateRequest;
 use App\Shared\Fields\Fields;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Utility\PaginateRequest;
@@ -16,16 +15,16 @@ use Illuminate\Http\Request;
 class ArtistController extends Controller
 {
     use HttpResponse;
-    public function getArtist(string $uuid)
+    public function getArtist(int $id)
     {
-        $artist = Artist::query()->where('uuid', $uuid)->first();
+        $artist = Artist::find($id);
         if (is_null($artist)) {
             return $this->error('Artist not found', 404);
         }
         return $this->success(new ArtistsResource($artist));
     }
 
-    public function searchArtists(SearchPaginateRequest $request)
+    public function searchArtists(PaginateRequest $request)
     {
         $perPage = $request->query(Fields::PER_PAGE, config('app.per_page_default'));
         $artists = Artist::query();
