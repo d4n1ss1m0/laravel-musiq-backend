@@ -4,6 +4,7 @@ namespace App\Service\TrackService;
 
 use App\DTO\AddTrack\AddTrackLinkDTO;
 use App\Enum\MusicService;
+use App\Models\Artist;
 use App\Models\Track;
 use App\DTO\AddTrack\AddTrackDTO;
 use App\Repositories\Artist\ArtistRepositoryInterface;
@@ -75,11 +76,10 @@ class TrackService implements TrackServiceInterface
         $artistsArray = $artists;
         $fileName = $track->image;
 
-
         $existsArtistsArray = [];
         foreach ($artistsArray as $item) {
             if(isset($item->id)) {
-                $existsArtistsArray[] = $item->id;;
+                $existsArtistsArray[] = $item->id;
             } else {
                 if($fileName != null) {
 
@@ -93,10 +93,13 @@ class TrackService implements TrackServiceInterface
                     $artistCover = $this->fileService->addFile($uploaded, 'image/artist', 'webp');
                 }
                 $artist = $this->artistRepository->create($item->name, $artistCover ?? null);
-                $item->id = $artist->id;
-                $existsArtistsArray[] = $item->id;;
+                $item->id = $artist->uuid;
+                $existsArtistsArray[] = $item->id;
             }
         }
+
+        $existsArtistsArray = Artist::whereIn('uuid', $existsArtistsArray)->pluck('id')->toArray();
+
         $track->artists()->syncWithoutDetaching($existsArtistsArray);
     }
 
