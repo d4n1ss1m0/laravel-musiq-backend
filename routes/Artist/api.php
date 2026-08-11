@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('artist')->middleware(\App\Http\Middleware\OptJwtMiddleware::class)->group(function () {
-    Route::get('{uuid}', [\App\Http\Controllers\Artist\ArtistController::class, 'getArtist']);
+    Route::get('{id}', [\App\Http\Controllers\Artist\ArtistController::class, 'getArtist']);
 });
 
 Route::prefix('artists')->middleware(\App\Http\Middleware\OptJwtMiddleware::class)->group(function () {
