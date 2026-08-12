@@ -23,10 +23,10 @@ class PlaybackSessionResource extends JsonResource
             ],
             'currentTrackId' => $this->currentTrack->uuid,
             'currentPosition' => $this->current_position,
-            'prev' => $this->previousQueueItem()->track->uuid,
-            'next' => $this->nextQueueItem()->track->uuid,
+            'prev' => $this->previousQueueItem()?->track?->uuid,
+            'next' => $this->nextQueueItem()?->track?->uuid,
             'shuffle' => $this->shuffle,
-            'repeateMode' => $this->repeat_mode->value,
+            'repeatMode' => $this->repeat_mode->value,
             'state' => $this->state->value
         ];
     }
