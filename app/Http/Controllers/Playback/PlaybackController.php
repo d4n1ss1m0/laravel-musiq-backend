@@ -6,6 +6,7 @@ use App\DTO\Playback\SnapshotDTO;
 use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
+use App\Http\Requests\Playback\RequeueRequest;
 use App\Http\Requests\Playback\ShuffleRequest;
 use App\Http\Requests\Playback\SnapshotRequest;
 use App\Http\Resources\Playback\PlaybackSessionResource;
@@ -56,12 +57,12 @@ class PlaybackController extends Controller
         }
     }
 
-    public function next(Request $request)
+    public function next(RequeueRequest $request)
     {
         try {
             $userId = $request->attributes->get(Fields::USER_ID);
 
-            $session = $this->playbackService->next($userId, $request->input('requeue'));
+            $session = $this->playbackService->next($userId, $request->boolean(Fields::REQUEUE, false));
 
             return $this->success(new PlaybackSessionResource($session));
         } catch (\Throwable $t) {
