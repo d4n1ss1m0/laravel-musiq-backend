@@ -6,6 +6,7 @@ use App\DTO\Playback\SnapshotDTO;
 use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
+use App\Http\Requests\Playback\RepeatRequest;
 use App\Http\Requests\Playback\RequeueRequest;
 use App\Http\Requests\Playback\ShuffleRequest;
 use App\Http\Requests\Playback\SnapshotRequest;
@@ -83,11 +84,11 @@ class PlaybackController extends Controller
         }
     }
 
-    public function repeat(Request $request)
+    public function repeat(RepeatRequest $request)
     {
         try {
             $userId = $request->attributes->get(Fields::USER_ID);
-            $repeatMode = RepeatType::tryFrom($request->input('repeatMode'));
+            $repeatMode = RepeatType::tryFrom($request->input(Fields::REPEAT));
 
             $session = $this->playbackService->repeat($repeatMode, $userId);
 

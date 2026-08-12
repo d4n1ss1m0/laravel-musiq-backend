@@ -44,7 +44,7 @@ class ShuffleRequest extends FormRequest
         return [
             'messages' => [
                 sprintf('%s.required', Fields::SHUFFLE) => 'Флаг перемешивания обязателен',
-                sprintf('%s.string', Fields::SHUFFLE)  => 'Флаг перемешивания должен быть булевым',
+                sprintf('%s.bool', Fields::SHUFFLE)  => 'Флаг перемешивания должен быть булевым',
             ],
         ];
     }
