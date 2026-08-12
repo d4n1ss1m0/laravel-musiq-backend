@@ -37,8 +37,8 @@ class RepeatRequest extends FormRequest
     {
         return [
             'messages' => [
-                sprintf('%s.required', Fields::REPEAT) => 'Флаг перемешивания обязателен',
-                sprintf('%s.string', Fields::REPEAT)  => 'Флаг перемешивания должен быть булевым',
+                sprintf('%s.required', Fields::REPEAT) => 'Тип повтора обязателен',
+                sprintf('%s.string', Fields::REPEAT)  => 'Тип повтора должен быть строкой',
             ],
         ];
     }
