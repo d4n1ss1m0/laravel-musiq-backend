@@ -6,6 +6,7 @@ use App\DTO\Playback\SnapshotDTO;
 use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
+use App\Http\Requests\Playback\ShuffleRequest;
 use App\Http\Requests\Playback\SnapshotRequest;
 use App\Http\Resources\Playback\PlaybackSessionResource;
 use App\Service\PlaybackService\PlaybackServiceInterface;
@@ -43,11 +44,11 @@ class PlaybackController extends Controller
         }
     }
 
-    public function shuffle(Request $request)
+    public function shuffle(ShuffleRequest $request)
     {
         try {
             $userId = $request->attributes->get(Fields::USER_ID);
-            $session = $this->playbackService->shuffle((bool)$request->input('shuffle'), $userId);
+            $session = $this->playbackService->shuffle((bool)$request->input(Fields::SHUFFLE), $userId);
 
             return $this->success(new PlaybackSessionResource($session));
         } catch (\Throwable $th) {
