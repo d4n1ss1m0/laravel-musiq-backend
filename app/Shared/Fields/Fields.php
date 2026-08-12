@@ -39,6 +39,7 @@ final class Fields
     //Playback
     public const REPEAT = 'repeatType';
     public const SHUFFLE = 'shuffle';
+    public const REQUEUE = 'requeue';
 
     private function __construct()
     {
