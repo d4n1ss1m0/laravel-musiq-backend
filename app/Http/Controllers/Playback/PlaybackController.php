@@ -6,6 +6,7 @@ use App\DTO\Playback\SnapshotDTO;
 use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
+use App\Http\Requests\Playback\SnapshotRequest;
 use App\Http\Resources\Playback\PlaybackSessionResource;
 use App\Service\PlaybackService\PlaybackServiceInterface;
 use App\Shared\Fields\Fields;
@@ -24,16 +25,16 @@ class PlaybackController extends Controller
     {
     }
 
-    public function snapshot(Request $request)
+    public function snapshot(SnapshotRequest $request)
     {
         try {
             $userId = $request->attributes->get(Fields::USER_ID);
             $dto = new SnapshotDTO(
-                PlaybackSource::tryFrom($request->input('source')),
-                $request->input('sourceId'),
-                $request->input('trackId'),
-                RepeatType::tryFrom($request->input('repeatType')),
-                (bool)$request->input('shuffle')
+                PlaybackSource::tryFrom($request->input(Fields::SOURCE)),
+                $request->input(Fields::SOURCE_ID),
+                $request->input(Fields::ID),
+                RepeatType::tryFrom($request->input(Fields::REPEAT)),
+                (bool)$request->input(Fields::SHUFFLE)
             );
             $this->playbackService->snapshot($dto, $userId);
             return $this->success('success');

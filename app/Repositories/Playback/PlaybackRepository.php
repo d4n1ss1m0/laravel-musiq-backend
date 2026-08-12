@@ -22,6 +22,7 @@ class PlaybackRepository implements PlaybackRepositoryInterface
         PlaybackSource $playbackSource,
         int $sourceId,
         int $currentTrackId,
+        int $position,
         bool $shuffle,
         RepeatType $repeatType,
         int $userId
@@ -36,7 +37,7 @@ class PlaybackRepository implements PlaybackRepositoryInterface
                 'shuffle' => $shuffle,
                 'repeat_mode' => $repeatType->value,
                 'state' => PlaybackState::PLAYING->value,
-                'current_position' => 1,
+                'current_position' => $position,
             ]);
     }
 

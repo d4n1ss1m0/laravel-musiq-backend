@@ -19,6 +19,7 @@ interface PlaybackRepositoryInterface
         PlaybackSource $playbackSource,
         int $sourceId,
         int $currentTrackId,
+        int $position,
         bool $shuffle,
         RepeatType $repeatType,
         int $userId

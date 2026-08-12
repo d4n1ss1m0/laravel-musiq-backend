@@ -40,11 +40,15 @@ class PlaybackService implements PlaybackServiceInterface
 
     public function snapshot(SnapshotDTO $dto, int $userId) : PlaybackSession
     {
-        $tracks = $this->getTracks($dto->source, $dto->sourceId, $dto->shuffle);
+        $tracks = $this->getTracks($dto->source, $dto->sourceId, $dto->trackId, $dto->shuffle);
+        $currentTrack = $tracks->firstWhere('uuid', $dto->trackId);
+        $currentTrackId = $currentTrack['id'];
+        $currentPosition = $currentTrack['position'];
+        if ($dto->shuffle) {
+            $currentPosition = 1;
+        }
 
         $sourceDbId = $this->getSourceDbId($dto->source, $dto->sourceId);
-
-        $currentTrackId = $tracks[0]['id'];
 
         $session = $this->repository->getByUserId($userId);
 
@@ -56,6 +60,7 @@ class PlaybackService implements PlaybackServiceInterface
             $dto->source,
             $sourceDbId,
             $currentTrackId,
+            $currentPosition,
             $dto->shuffle,
             $dto->repeatType,
             $userId
@@ -65,7 +70,7 @@ class PlaybackService implements PlaybackServiceInterface
         return $session;
     }
 
-    private function getTracks(PlaybackSource $type, string $sourceId, bool $shuffle = false)
+    private function getTracks(PlaybackSource $type, string $sourceId, string $currentTrackId, bool $shuffle = false)
     {
         $tracks = match ($type) {
             PlaybackSource::PLAYLIST => $this->playlistRepository->getPlaylistTracks($sourceId),
@@ -75,9 +80,11 @@ class PlaybackService implements PlaybackServiceInterface
 
         $tracksArray = [];
         $position = 1;
+
         foreach ($tracks as $track) {
             $tracksArray[] = [
                 'id' => $track->id,
+                'uuid' => $track->uuid,
                 'position' => $position,
             ];
 
@@ -87,7 +94,16 @@ class PlaybackService implements PlaybackServiceInterface
         $tracks = collect($tracksArray);
 
         if ($shuffle) {
+            $currentTrack = $tracks->firstWhere('uuid', $currentTrackId);
+            $tracks = $tracks->reject(fn ($track) => $track['uuid'] === $currentTrackId)
+                ->values();
+
             $tracks = $tracks->shuffle();
+            $tracks = $tracks->prepend([
+                    'id' => $currentTrack['id'],
+                    'uuid' => $currentTrack['uuid'],
+                    'position' => $currentTrack['position']
+                ]);
         }
 
         return $tracks;

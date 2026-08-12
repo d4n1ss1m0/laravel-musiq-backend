@@ -34,7 +34,11 @@ final class Fields
 
     //History
     public const SOURCE = 'source';
-    public const SOURCE_ID = 'source_id';
+    public const SOURCE_ID = 'sourceId';
+
+    //Playback
+    public const REPEAT = 'repeatType';
+    public const SHUFFLE = 'shuffle';
 
     private function __construct()
     {
