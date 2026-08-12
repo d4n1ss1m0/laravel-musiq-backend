@@ -128,18 +128,26 @@ class PlaybackService implements PlaybackServiceInterface
             return $session;
         }
 
-        $session->shuffle = $shuffle;
+        try {
+            DB::beginTransaction();
+            $session->shuffle = $shuffle;
 
-        $currentTrackPosition = $session->current_position;
-        $currentTrackId = $session->current_track_id;
+            $currentTrackPosition = $session->current_position;
+            $currentTrackId = $session->current_track_id;
 
-        if ($shuffle) {
-            $this->shuffleTracks($session, $currentTrackPosition, $currentTrackId);
-        } else {
-            $this->unshuffleTracks($session, $currentTrackPosition, $currentTrackId);
+            if ($shuffle) {
+                $this->shuffleTracks($session, $currentTrackPosition, $currentTrackId);
+            } else {
+                $this->unshuffleTracks($session, $currentTrackPosition, $currentTrackId);
+            }
+
+            $session->save();
+            DB::commit();
+            $session->load(['source', 'currentTrack', 'sessionTracks.track']);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-
-        $session->save();
 
         return $session;
     }
