@@ -278,6 +278,9 @@ class PlaybackService implements PlaybackServiceInterface
     public function repeat(RepeatType $repeatType, int $userId) : PlaybackSession
     {
         $session = $this->repository->getByUserId($userId);
+        if (!$session) {
+            throw new \Exception("Session not found");
+        }
         $session->repeat_mode = $repeatType;
         $session->save();
         return $session;
@@ -286,6 +289,9 @@ class PlaybackService implements PlaybackServiceInterface
     public function changeState(PlaybackState $state, int $userId) : PlaybackSession
     {
         $session = $this->repository->getByUserId($userId);
+        if (!$session) {
+            throw new \Exception("Session not found");
+        }
         $session->state = $state;
         $session->save();
         return $session;
