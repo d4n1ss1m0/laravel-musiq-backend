@@ -26,7 +26,7 @@ class MediatekaController extends Controller
     public function getMediateka(Request $request)
     {
         try {
-            $userId = $request->attributes->get('userId');
+            $userId = $request->attributes->get(Fields::USER_ID);
             $mediateka = $this->mediatekaService->getMediateka($userId, OrderBy::CREATED_AT, $request->get('query') ?? '');
             return MediatekaItemResource::collection($mediateka);
         } catch ( \Exception $e) {
@@ -37,7 +37,7 @@ class MediatekaController extends Controller
     public function addMedia(MediaUUIDRequest $request, string $type)
     {
         try{
-            $userId = $request->attributes->get('userId');
+            $userId = $request->attributes->get(Fields::USER_ID);
             $mediaId = $request->input(Fields::ID);
 
             $mediaType = MediatekaItemType::tryFrom($type);
@@ -53,7 +53,7 @@ class MediatekaController extends Controller
     public function removeMedia(MediaUUIDRequest $request, string $type)
     {
         try{
-            $userId = $request->attributes->get('userId');
+            $userId = $request->attributes->get(Fields::USER_ID);
             $mediaId = $request->input(Fields::ID);
 
             $mediaType = MediatekaItemType::tryFrom($type);
@@ -69,7 +69,7 @@ class MediatekaController extends Controller
     public function pinItem(MediaUUIDRequest $request, string $type)
     {
         try {
-            $userId = $request->attributes->get('userId');
+            $userId = $request->attributes->get(Fields::USER_ID);
             $mediaId = $request->input(Fields::ID);
             $type = MediatekaItemType::tryFrom($type);
             $this->mediatekaService->pinMedia($type, $mediaId, $userId);
@@ -83,7 +83,7 @@ class MediatekaController extends Controller
     public function unpinItem(MediaUUIDRequest $request, string $type)
     {
         try {
-            $userId = $request->attributes->get('userId');
+            $userId = $request->attributes->get(Fields::USER_ID);
             $mediaId = $request->input(Fields::ID);
             $type = MediatekaItemType::tryFrom($type);
             $this->mediatekaService->unpinMedia($type, $mediaId, $userId);
