@@ -45,7 +45,7 @@ class Playlist extends Model implements MediatekaLibraryable
     }
 
     public function tracks() {
-        return $this->belongsToMany(Track::class, 'track_playlists');
+        return $this->belongsToMany(Track::class, 'track_playlists')->withPivot('order');
     }
 
 

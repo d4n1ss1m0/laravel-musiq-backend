@@ -34,7 +34,7 @@ class Artist extends Model implements MediatekaLibraryable
     }
 
     public function tracks() {
-        return $this->belongsToMany(Track::class, 'track_artists');
+        return $this->belongsToMany(Track::class, 'track_artists')->withPivot('id');
     }
 
     public function favouriteCount() {

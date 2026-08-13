@@ -15,6 +15,7 @@ final class Fields
     public const LINK = 'link';
     public const SERVICE = 'service';
     public const QUERY = 'query';
+    public const USER_ID = 'userId';
     public const TYPE = 'type';
     public const ORDER = 'order';
 
@@ -33,7 +34,12 @@ final class Fields
 
     //History
     public const SOURCE = 'source';
-    public const SOURCE_ID = 'source_id';
+    public const SOURCE_ID = 'sourceId';
+
+    //Playback
+    public const REPEAT = 'repeatType';
+    public const SHUFFLE = 'shuffle';
+    public const REQUEUE = 'requeue';
 
     private function __construct()
     {

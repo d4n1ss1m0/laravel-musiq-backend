@@ -8,6 +8,7 @@ use App\Models\Track;
 use App\Models\TrackPlaylist;
 use App\Repositories\Track\TrackRepositoryInterface;
 use App\Shared\Enums\PlaylistTypes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -126,5 +127,15 @@ class PlaylistRepository implements PlaylistRepositoryInterface
         Playlist::query()
             ->where('id', $playlistId)
             ->update($data);
+    }
+
+    public function getPlaylistTracks(string $uuid): Collection
+    {
+        return Playlist::query()
+            ->where('uuid', $uuid)
+            ->with('tracks', function ($query) {
+                $query->orderBy('track_playlists.order');
+            })
+            ->first()->tracks;
     }
 }

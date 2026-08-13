@@ -7,6 +7,8 @@ use App\Repositories\History\HistoryRepository;
 use App\Repositories\History\HistoryRepositoryInterface;
 use App\Repositories\Mediateka\MediatekaRepository;
 use App\Repositories\Mediateka\MediatekaRepositoryInterface;
+use App\Repositories\Playback\PlaybackRepository;
+use App\Repositories\Playback\PlaybackRepositoryInterface;
 use App\Repositories\Playlist\PlaylistRepository;
 use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Repositories\RecentlyPlayedTrack\RecentlyPlayedTrackRepository;
@@ -37,6 +39,8 @@ use App\Repositories\Track\TrackRepository;
 use App\Repositories\Track\TrackRepositoryInterface;
 use App\Repositories\User\UserRepository;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Service\PlaybackService\PlaybackService;
+use App\Service\PlaybackService\PlaybackServiceInterface;
 use App\Service\PlaylistService\PlaylistService;
 use App\Service\PlaylistService\PlaylistServiceInterface;
 use App\Service\TrackService\TrackService;
@@ -58,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RecentlyPlayedTracksServiceInterface::class, RecentlyPlayedTracksService::class);
         $this->app->bind(MediatekaServiceInterface::class, MediatekaService::class);
         $this->app->bind(HistoryServiceInterface::class, HistoryService::class);
+        $this->app->bind(PlaybackServiceInterface::class, PlaybackService::class);
 
         //Repositories
         $this->app->bind(ArtistRepositoryInterface::class, ArtistRepository::class);
@@ -67,6 +72,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PlaylistRepositoryInterface::class, PlaylistRepository::class);
         $this->app->bind(MediatekaRepositoryInterface::class, MediatekaRepository::class);
         $this->app->bind(HistoryRepositoryInterface::class, HistoryRepository::class);
+        $this->app->bind(PlaybackRepositoryInterface::class, PlaybackRepository::class);
 
         //Infrastructure
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
