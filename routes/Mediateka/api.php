@@ -15,13 +15,11 @@ Route::prefix('mediateka')
             ->group(function () {
                 Route::patch('/pin', [MediatekaController::class, 'pinItem']);
                 Route::patch('/unpin', [MediatekaController::class, 'unpinItem']);
-            });
 
-        Route::prefix('{type}')
-            ->whereIn('type', [MediatekaItemType::ARTIST->value])
-            ->group(function () {
-                Route::post('/add', [MediatekaController::class, 'addMedia']);
-                Route::delete('/remove', [MediatekaController::class, 'removeMedia']);
+                Route::middleware(\App\Http\Middleware\IsMyPlaylistMiddleware::class . ':false')->group(function () {
+                    Route::post('/add', [MediatekaController::class, 'addMedia']);
+                    Route::delete('/remove', [MediatekaController::class, 'removeMedia']);
+                });
             });
     });
 
