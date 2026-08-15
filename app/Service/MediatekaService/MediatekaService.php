@@ -6,6 +6,7 @@ use App\Contracts\MediatekaLibraryable;
 use App\Enum\MediatekaItemType;
 use App\Enum\OrderBy;
 use App\Models\Artist;
+use App\Models\ListeningHistoryItem;
 use App\Models\Mediateka\MediatekaItem;
 use App\Models\Playlist;
 use App\Repositories\Artist\ArtistRepositoryInterface;
@@ -30,12 +31,32 @@ class MediatekaService implements MediatekaServiceInterface
     {
         $mediatekaQuery = MediatekaItem::query()
             ->where('user_id', $userId)
+            ->orderByRaw('pin_position IS NULL')
             ->orderBy('pin_position')
             ->with('libraryable');
 
         switch ($orderBy) {
             case OrderBy::CREATED_AT:
                 $mediatekaQuery->orderByDesc('created_at');
+                break;
+            case OrderBy::RECENT:
+                $recentHistory = ListeningHistoryItem::query()
+                    ->selectRaw('source_type, source_id, MAX(last_played_at) as recent_played_at')
+                    ->where('user_id', $userId)
+                    ->whereNotNull('source_type')
+                    ->whereNotNull('source_id')
+                    ->groupBy('source_type', 'source_id');
+
+                $mediatekaQuery
+                    ->leftJoinSub($recentHistory, 'recent_history', function ($join) {
+                        $join->on('recent_history.source_type', '=', 'user_library_items.libraryable_type')
+                            ->on('recent_history.source_id', '=', 'user_library_items.libraryable_id');
+                    })
+                    ->select('user_library_items.*')
+                    ->orderByRaw('recent_history.recent_played_at IS NULL')
+                    ->orderByDesc('recent_history.recent_played_at')
+                    ->orderByDesc('user_library_items.created_at');
+
                 break;
             default:
         }
