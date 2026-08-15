@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mediateka;
 
 use App\Enum\MediatekaItemType;
 use App\Enum\OrderBy;
+use App\Http\Requests\Mediateka\MediatekaRequest;
 use App\Http\Requests\Mediateka\MediaUUIDRequest;
 use App\Http\Resources\Mediateka\MediatekaItemResource;
 use App\Service\MediatekaService\MediatekaServiceInterface;
@@ -23,7 +24,7 @@ class MediatekaController extends Controller
 
     }
 
-    public function getMediateka(Request $request)
+    public function getMediateka(MediatekaRequest $request)
     {
         try {
             $userId = $request->attributes->get(Fields::USER_ID);

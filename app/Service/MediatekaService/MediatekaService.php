@@ -30,7 +30,7 @@ class MediatekaService implements MediatekaServiceInterface
     public function getMediateka(int $userId, OrderBy $orderBy = OrderBy::RECENT, string $query = '')
     {
         $mediatekaQuery = MediatekaItem::query()
-            ->where('user_id', $userId)
+            ->where('user_library_items.user_id', $userId)
             ->orderByRaw('pin_position IS NULL')
             ->orderBy('pin_position')
             ->with('libraryable');
@@ -56,6 +56,20 @@ class MediatekaService implements MediatekaServiceInterface
                     ->orderByRaw('recent_history.recent_played_at IS NULL')
                     ->orderByDesc('recent_history.recent_played_at')
                     ->orderByDesc('user_library_items.created_at');
+
+                break;
+            case OrderBy::ALPAHABET:
+                $mediatekaQuery
+                    ->leftJoin('playlists', function ($join) {
+                        $join->on('playlists.id', '=', 'user_library_items.libraryable_id')
+                            ->where('user_library_items.libraryable_type', Playlist::class);
+                    })
+                    ->leftJoin('artists', function ($join) {
+                        $join->on('artists.id', '=', 'user_library_items.libraryable_id')
+                            ->where('user_library_items.libraryable_type', Artist::class);
+                    })
+                    ->select('user_library_items.*')
+                    ->orderByRaw('LOWER(COALESCE(playlists.name, artists.name)) ASC');
 
                 break;
             default:
