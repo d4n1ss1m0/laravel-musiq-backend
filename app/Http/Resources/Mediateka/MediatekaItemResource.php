@@ -6,6 +6,7 @@ use App\Http\Resources\Artist\ArtistsResource;
 use App\Http\Resources\Playlists\PlaylistResource;
 use App\Models\Artist;
 use App\Models\Playlist;
+use App\Shared\Enums\PlaylistTypes;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
@@ -32,6 +33,9 @@ class MediatekaItemResource extends JsonResource
         return [
             'type' => class_basename($this->libraryable_type),
             'item' => new $resource($this->libraryable),
+            'pinPosition' => $this->pin_position
         ];
+
+
     }
 }

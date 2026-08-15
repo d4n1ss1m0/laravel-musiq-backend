@@ -18,6 +18,7 @@ final class Fields
     public const USER_ID = 'userId';
     public const TYPE = 'type';
     public const ORDER = 'order';
+    public const UUID = 'uuid';
 
     // Artist
     public const ARTIST = 'artist';

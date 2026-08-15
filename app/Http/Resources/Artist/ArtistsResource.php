@@ -18,7 +18,7 @@ class ArtistsResource extends JsonResource
         return[
             'id' => $this->uuid,
             'name' => $this->name,
-            'image' => $this->image ? "artist/{$this->image}" : null,
+            'image' => $this->image ? "/image/artist/{$this->image}" : null,
         ];
     }
 }
