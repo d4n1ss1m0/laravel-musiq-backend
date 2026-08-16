@@ -10,7 +10,12 @@ use OpenApi\Attributes as OA;
     properties: [
         new OA\Property(property: 'id', type: 'string', format: 'uuid', example: '018ff4e6-5d84-7000-8e14-2f6d17c1b9fd'),
         new OA\Property(property: 'name', type: 'string', example: 'My playlist'),
-        new OA\Property(property: 'image', type: 'string', example: '/image/playlist/cover.webp'),
+        new OA\Property(
+            property: 'image',
+            type: 'array',
+            items: new OA\Items(type: 'string', example: '/image/playlist/cover.webp'),
+            example: ['/image/playlist/cover.webp'],
+        ),
         new OA\Property(property: 'type', type: 'string', enum: ['public', 'private', 'favourite'], example: 'public'),
     ],
     type: 'object',

@@ -138,6 +138,80 @@ class PlaylistPaths
     }
 
     #[OA\Post(
+        path: '/playlist/favourite/add',
+        summary: 'Add tracks to favourite playlist',
+        security: [['tokenAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/PlaylistAddTracksRequest'),
+        ),
+        tags: ['Playlist'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Tracks added to favourite playlist',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ApiSuccessResponse'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(property: 'data', ref: '#/components/schemas/PlaylistActionMessage'),
+                            ],
+                            type: 'object',
+                        ),
+                    ],
+                ),
+            ),
+            new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error',
+                content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse'),
+            ),
+        ],
+    )]
+    public function addFavourite(): void
+    {
+    }
+
+    #[OA\Delete(
+        path: '/playlist/favourite/remove',
+        summary: 'Remove tracks from favourite playlist',
+        security: [['tokenAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/PlaylistRemoveTracksRequest'),
+        ),
+        tags: ['Playlist'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Tracks removed from favourite playlist',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ApiSuccessResponse'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(property: 'data', ref: '#/components/schemas/PlaylistActionMessage'),
+                            ],
+                            type: 'object',
+                        ),
+                    ],
+                ),
+            ),
+            new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error',
+                content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse'),
+            ),
+        ],
+    )]
+    public function removeFavourite(): void
+    {
+    }
+
+    #[OA\Post(
         path: '/playlist/create',
         summary: 'Create playlist',
         security: [['tokenAuth' => []]],
