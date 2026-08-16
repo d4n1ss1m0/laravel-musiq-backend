@@ -1,10 +1,17 @@
 <?php
 
+use App\Http\Controllers\Playlist\PlaylistController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('playlist')->middleware(\App\Http\Middleware\JwtAuthMiddleware::class)->group(function () {
+    Route::prefix('favourite')
+        ->group(function () {
+            Route::post('/add', [PlaylistController::class, 'addFavourite']);
+            Route::delete('/remove', [PlaylistController::class, 'removeFavourite']);
+        });
+
     Route::prefix('{uuid}')
         ->middleware([\App\Http\Middleware\IsPlaylistExistsMiddleware::class])
         ->group(function () {
