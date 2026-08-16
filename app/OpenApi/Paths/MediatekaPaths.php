@@ -15,8 +15,8 @@ class MediatekaPaths
             new OA\Parameter(
                 name: 'order',
                 in: 'query',
-                required: false,
-                schema: new OA\Schema(type: 'string', enum: ['recent', 'alphabet', 'created_at', 'author'], default: 'created_at'),
+                required: true,
+                schema: new OA\Schema(type: 'string', enum: ['recent', 'alphabet', 'created_at'], example: 'created_at'),
             ),
             new OA\Parameter(
                 name: 'query',

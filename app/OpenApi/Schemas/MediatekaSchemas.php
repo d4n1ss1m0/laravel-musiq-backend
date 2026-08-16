@@ -19,10 +19,11 @@ use OpenApi\Attributes as OA;
 )]
 #[OA\Schema(
     schema: 'MediatekaItem',
-    required: ['type', 'item'],
+    required: ['type', 'item', 'pinPosition'],
     properties: [
         new OA\Property(property: 'type', type: 'string', enum: ['Playlist', 'Artist'], example: 'Playlist'),
         new OA\Property(property: 'item', ref: '#/components/schemas/MediatekaItemPayload'),
+        new OA\Property(property: 'pinPosition', type: 'integer', nullable: true, example: 1),
     ],
     type: 'object',
 )]
@@ -34,6 +35,27 @@ use OpenApi\Attributes as OA;
             property: 'data',
             type: 'array',
             items: new OA\Items(ref: '#/components/schemas/MediatekaItem'),
+            example: [
+                [
+                    'type' => 'Playlist',
+                    'item' => [
+                        'id' => '018ff4e6-5d84-7000-8e14-2f6d17c1b9fd',
+                        'name' => 'My playlist',
+                        'image' => ['/image/playlist/cover.webp'],
+                        'type' => 'public',
+                    ],
+                    'pinPosition' => 1,
+                ],
+                [
+                    'type' => 'Artist',
+                    'item' => [
+                        'id' => '018ff4e6-5d84-7000-8e14-2f6d17c1b9fe',
+                        'name' => 'Daft Punk',
+                        'image' => '/image/artist/cover.webp',
+                    ],
+                    'pinPosition' => null,
+                ],
+            ],
         ),
     ],
     type: 'object',
