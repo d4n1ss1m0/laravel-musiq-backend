@@ -6,11 +6,13 @@ namespace App\Http\Controllers\Playlist;
 use App\DTO\Playlist\CreatePlaylistDTO;
 use App\DTO\Playlist\UpdatePlaylistDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Playlist\AddTrackToFavouriteRequest;
 use App\Http\Requests\Playlist\AddTrackToPlaylistRequest;
 use App\Http\Requests\Playlist\ChangeTrackOrderRequest;
 use App\Http\Requests\Playlist\CreatePlaylistRequest;
 use App\Http\Requests\Playlist\ImportFromPlaylistRequest;
 use App\Http\Requests\Playlist\ManyTracksRequest;
+use App\Http\Requests\Playlist\RemoveTrackFromFavouriteRequest;
 use App\Http\Requests\Playlist\UpdatePlaylistRequest;
 use App\Http\Requests\Utility\SearchPaginateRequest;
 use App\Http\Resources\Playlists\PlaylistResource;
@@ -167,6 +169,28 @@ class PlaylistController extends Controller
             return $this->success(['message' => 'Playlist imported']);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 'error', $e->getCode());
+        }
+    }
+
+    public function addFavourite(AddTrackToFavouriteRequest $request)
+    {
+        try {
+            $userId = $request->attributes->get(Fields::USER_ID);
+            $this->playlistService->addToFavourite($userId, $request->input(Fields::IDS));
+            return $this->success(['message' => 'Track added']);
+        } catch (\Throwable $th) {
+            return $this->error($th->getMessage());
+        }
+    }
+
+    public function removeFavourite(RemoveTrackFromFavouriteRequest $request)
+    {
+        try {
+            $userId = $request->attributes->get(Fields::USER_ID);
+            $this->playlistService->removeFromFavourite($userId, $request->input(Fields::IDS));
+            return $this->success(['message' => 'Track removed']);
+        } catch (\Throwable $th) {
+            return $this->error($th->getMessage());
         }
     }
 }

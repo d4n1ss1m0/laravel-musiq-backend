@@ -91,8 +91,14 @@ class PlaylistService implements PlaylistServiceInterface
 
     public function addTrackToPlaylist(string $playlistId, array $trackIds): void
     {
-        DB::transaction(function () use ($playlistId, $trackIds) {
-            $playlistIntId = Playlist::query()->where('uuid', $playlistId)->value('id');
+        $playlist = Playlist::query()->where('uuid', $playlistId)->firstOrFail();
+        $this->addTracks($playlist, $trackIds);
+    }
+
+    private function addTracks(Playlist $playlist, array $trackIds): void
+    {
+        DB::transaction(function () use ($playlist, $trackIds) {
+            $playlistIntId = $playlist->id;
             TrackPlaylist::query()
                 ->where('playlist_id', $playlistIntId)
                 ->lockForUpdate()
@@ -101,8 +107,8 @@ class PlaylistService implements PlaylistServiceInterface
             $tracksArray = Track::query()->whereIn('uuid', $trackIds)->get(['id', 'uuid'])->keyBy('uuid')->toArray();
             $tracks = [];
             foreach ($trackIds as $trackId) {
-               $track = $tracksArray[$trackId] ?? null;
-               $tracks[] = new PlaylistTrackDTO((int)$track['id'], ++$lastOrder);
+                $track = $tracksArray[$trackId] ?? null;
+                $tracks[] = new PlaylistTrackDTO((int)$track['id'], ++$lastOrder);
             }
 
             $this->repository->addTracks($playlistIntId, $tracks);
@@ -167,5 +173,24 @@ class PlaylistService implements PlaylistServiceInterface
             $this->repository->addTracks($toPlaylistIntId, $tracks);
 
         });
+    }
+
+    public function addToFavourite(int $userId, array $trackIds): void
+    {
+        $playlist = Playlist::query()
+            ->where('user_id', $userId)
+            ->where('type', PlaylistTypes::FAVOURITE->getId())
+            ->firstOrFail();
+
+        $this->addTracks($playlist, $trackIds);
+
+    }
+
+    public function removeFromFavourite(int $userId, array $trackIds): void
+    {
+        $playlistIntId = Playlist::query()
+            ->where('user_id', $userId)
+            ->where('type', PlaylistTypes::FAVOURITE->getId())->value('id');
+        $this->repository->removeTracks($playlistIntId, $trackIds);
     }
 }
