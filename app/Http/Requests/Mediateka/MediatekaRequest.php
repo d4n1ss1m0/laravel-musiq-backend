@@ -34,7 +34,7 @@ class MediatekaRequest extends FormRequest
             Fields::ORDER => [
                 'required',
                 'string',
-                'default' => OrderBy::CREATED_AT,
+//                'default' => OrderBy::CREATED_AT->value,
                 Rule::enum(OrderBy::class)
             ]
         ];

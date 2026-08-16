@@ -53,7 +53,10 @@ class PlaylistResource extends JsonResource
             'name' => $this->name,
 //            'image' => $this->image ?'/image/playlist/'.$this->image : '',
             'image' => $imagesArray,
-            'type' => $this->playlistType->name,
+            'type' => [
+                'id' => $this->playlistType->id,
+                'name' => $this->playlistType->name
+            ],
             //'tracks' => TrackResource::collection($this->tracks)
         ];
     }
