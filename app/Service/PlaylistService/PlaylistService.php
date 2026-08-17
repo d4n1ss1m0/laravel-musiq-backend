@@ -175,22 +175,23 @@ class PlaylistService implements PlaylistServiceInterface
         });
     }
 
-    public function addToFavourite(int $userId, array $trackIds): void
+    public function getFavouritePlaylist(int $userId): Playlist
     {
-        $playlist = Playlist::query()
+        return Playlist::query()
             ->where('user_id', $userId)
             ->where('type', PlaylistTypes::FAVOURITE->getId())
             ->firstOrFail();
+    }
 
+    public function addToFavourite(int $userId, array $trackIds): void
+    {
+        $playlist = $this->getFavouritePlaylist($userId);
         $this->addTracks($playlist, $trackIds);
-
     }
 
     public function removeFromFavourite(int $userId, array $trackIds): void
     {
-        $playlistIntId = Playlist::query()
-            ->where('user_id', $userId)
-            ->where('type', PlaylistTypes::FAVOURITE->getId())->value('id');
+        $playlistIntId = $this->getFavouritePlaylist($userId)->id;
         $this->repository->removeTracks($playlistIntId, $trackIds);
     }
 }

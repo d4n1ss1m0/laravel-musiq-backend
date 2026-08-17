@@ -7,6 +7,8 @@ Route::prefix('main-page')->middleware(\App\Http\Middleware\JwtAuthMiddleware::c
     Route::get('/recently-played-tracks', [\App\Http\Controllers\MainPage\MainPageController::class, 'getRecentlyPlayedTracks']);
     Route::get('/recently-played-playlists', [\App\Http\Controllers\MainPage\MainPageController::class, 'getRecentlyPlayedPlaylists']);
     Route::get('/recently-added-tracks', [\App\Http\Controllers\MainPage\MainPageController::class, 'getRecentlyAddedTracks']);
+
+    Route::get('/most-playable-playlists', [\App\Http\Controllers\MainPage\MainPageController::class, 'getMostPlayablePlaylists']);
 });
 
 

@@ -19,6 +19,7 @@ interface PlaylistServiceInterface
     public function deletePlaylist(string $playlistId);
     public function importFromPlaylist(string $fromId, string $toId);
 
+    public function getFavouritePlaylist(int $userId): Playlist;
     public function addToFavourite(int $userId, array $trackIds) : void;
     public function removeFromFavourite(int $userId, array $trackIds) : void;
 }

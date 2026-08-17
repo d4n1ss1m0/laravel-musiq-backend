@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\MainPage;
 
+use App\Http\Resources\Playlists\PlaylistResource;
+use App\Models\Playlist;
+use App\Repositories\Playlist\PlaylistRepositoryInterface;
+use App\Service\PlaylistService\PlaylistServiceInterface;
 use App\Shared\Fields\Fields;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Utility\PaginateRequest;
@@ -19,7 +23,8 @@ class MainPageController extends Controller
     public function __construct(
         private readonly RecentlyPlayedTracksServiceInterface $recentlyPlayedTracksService,
         private readonly RecentlyPlayedPlaylistsServiceInterface $recentlyPlayedPlaylistsService,
-        private readonly RecentlyAddedTracksServiceInterface $recentlyAddedTracksService
+        private readonly RecentlyAddedTracksServiceInterface $recentlyAddedTracksService,
+        private readonly PlaylistServiceInterface $playlistServiceInterface
     )
     {
     }
@@ -52,6 +57,32 @@ class MainPageController extends Controller
             return $this->success($this->paginator($keyValueArray, $tracks->total(), $tracks->perPage(), $tracks->currentPage()));
         } catch (\Exception $e) {
             return $this->error($e->getMessage());
+        }
+    }
+
+    public function getMostPlayablePlaylists(Request $request)
+    {
+        try {
+            $userId = $request->attributes->get('userId');
+            $playlists = $this->recentlyPlayedPlaylistsService->getMostPlayablePlaylists($userId, 4);
+            $playlists = PlaylistResource::collection($playlists)->resolve();
+            $favourite = (new PlaylistResource($this->playlistServiceInterface->getFavouritePlaylist($userId)))->resolve();
+            $history = [
+                'id' => 'history',
+                'name' => 'history',
+                'image' => [],
+                'type' => [
+                    'id' => 'history',
+                    'name' => 'history',
+                ]
+            ];
+            $array = [];
+            array_push($array, $favourite);
+            array_push($array, $history);
+            $array = array_merge($array, $playlists);
+            return $this->success($array);
+        } catch (\Throwable $th) {
+            return $this->error($th->getMessage());
         }
     }
 }
