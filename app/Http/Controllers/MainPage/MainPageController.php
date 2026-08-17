@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\MainPage;
 
+use App\Http\Requests\Playlist\MostPlayablePlaylistsRequest;
 use App\Http\Resources\Playlists\PlaylistResource;
 use App\Models\Playlist;
 use App\Repositories\Playlist\PlaylistRepositoryInterface;
@@ -60,11 +61,12 @@ class MainPageController extends Controller
         }
     }
 
-    public function getMostPlayablePlaylists(Request $request)
+    public function getMostPlayablePlaylists(MostPlayablePlaylistsRequest $request)
     {
         try {
             $userId = $request->attributes->get('userId');
-            $playlists = $this->recentlyPlayedPlaylistsService->getMostPlayablePlaylists($userId, 4);
+            $limit = $request->input(Fields::PER_PAGE);
+            $playlists = $this->recentlyPlayedPlaylistsService->getMostPlayablePlaylists($userId, $limit);
             $playlists = PlaylistResource::collection($playlists)->resolve();
             $favourite = (new PlaylistResource($this->playlistServiceInterface->getFavouritePlaylist($userId)))->resolve();
             $history = [

@@ -73,6 +73,52 @@ class MainPagePaths
     }
 
     #[OA\Get(
+        path: '/main-page/most-playable-playlists',
+        summary: 'Get most playable playlists',
+        security: [['tokenAuth' => []]],
+        tags: ['Main Page'],
+        parameters: [
+            new OA\Parameter(
+                name: 'per_page',
+                in: 'query',
+                required: true,
+                schema: new OA\Schema(type: 'integer', minimum: 1, maximum: 10),
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Most playable playlists',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ApiSuccessResponse'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(property: 'data', ref: '#/components/schemas/MainPageMostPlayablePlaylistsData'),
+                            ],
+                            type: 'object',
+                        ),
+                    ],
+                ),
+            ),
+            new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error',
+                content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse'),
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Server error',
+                content: new OA\JsonContent(ref: '#/components/schemas/ApiErrorResponse'),
+            ),
+        ],
+    )]
+    public function getMostPlayablePlaylists(): void
+    {
+    }
+
+    #[OA\Get(
         path: '/main-page/recently-added-tracks',
         summary: 'Get recently added tracks',
         security: [['tokenAuth' => []]],
