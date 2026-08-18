@@ -10,6 +10,7 @@ class RecentlyAddedTracksService implements RecentlyAddedTracksServiceInterface
 
     public function getRecently(int $perPage = 10): LengthAwarePaginator {
         $paginator = Track::query()
+            ->where('is_private', false)
             ->with('artists')
             ->orderByDesc('created_at')
             ->paginate($perPage);
