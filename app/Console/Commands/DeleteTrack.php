@@ -36,7 +36,7 @@ class DeleteTrack extends Command
             $fileService->deleteFile($image);
         }
 
-        $track->delete();
+
         TrackPlaylist::query()
             ->where('track_id', $track->id)
             ->delete();
@@ -48,6 +48,8 @@ class DeleteTrack extends Command
         TrackArtists::query()
             ->where('track_id', $track->id)
             ->delete();
+
+        $track->delete();
 
         $this->info("Track deleted: {$uuid}");
 
