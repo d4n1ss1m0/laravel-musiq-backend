@@ -3,21 +3,37 @@
 namespace App\Repositories\Track;
 
 use App\Models\Track;
+use App\Models\TrackImport;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class TrackRepository implements TrackRepositoryInterface
 {
 
-    public function create(string $name, int $time, string $file, string $cover, int $userId) : Track
+    public function create(string $name, int $time, string $file, ?string $cover, ?string $text, bool $isPrivate, int $userId) : Track
     {
         $track = Track::create([
             'name' => $name,
             'time' => $time,
             'song' => $file,
             'image' => $cover,
-            'is_private' => false,
+            'text' => $text,
+            'is_private' => $isPrivate,
             'user_id' => $userId,
+        ]);
+        return $track;
+    }
+
+    public function createImport(string $name, string $file, ?string $cover, ?string $text, bool $isPrivate, int $userId) : TrackImport
+    {
+        $track = TrackImport::create([
+            'name' => $name,
+            'song' => $file,
+            'image' => $cover,
+            'is_private' => $isPrivate,
+            'text' => $text,
+            'user_id' => $userId,
+            'status' => 'pending'
         ]);
         return $track;
     }

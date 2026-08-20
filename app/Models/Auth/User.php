@@ -4,6 +4,7 @@ namespace App\Models\Auth;
 
 use App\Models\Playlist;
 use App\Models\Track;
+use App\Models\TrackImport;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
@@ -33,6 +34,10 @@ class User extends Model
 
     public function recentlyPlayedPlaylists() {
         return $this->belongsToMany(Playlist::class, 'recently_played_playlists');
+    }
+
+    public function trackImports() {
+        return $this->hasMany(TrackImport::class, 'user_id');
     }
 
     public function checkPassword(string $password):bool

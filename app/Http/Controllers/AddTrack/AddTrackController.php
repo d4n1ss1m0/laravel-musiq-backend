@@ -34,9 +34,9 @@ class AddTrackController extends Controller
             $artistArray,
             $request->file(Fields::COVER));
 
-        $trackId = $useCase->addTrackByFile($trackDto, $userId);
+        $useCase->addTrackByFile($trackDto, $userId);
 
-        return $this->success(['trackId' => $trackId]);
+        return $this->success(['message' => 'Track on import']);
     }
 
     public function parseFromLink(ParseLinkRequest $request, TrackServiceInterface $useCase)
@@ -71,8 +71,8 @@ class AddTrackController extends Controller
             $coverName
         );
 
-        $trackId = $useCase->addTrackByLink($trackDto, $userId);
+        $useCase->addTrackByLink($trackDto, $userId);
 
-        return $this->success(['trackId' => $trackId]);
+        return $this->success(['message' => 'Track on import']);
     }
 }

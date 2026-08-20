@@ -4,9 +4,11 @@ namespace App\Service\TrackService;
 
 use App\DTO\AddTrack\AddTrackLinkDTO;
 use App\Enum\MusicService;
+use App\Jobs\ProcessImportTrack;
 use App\Models\Artist;
 use App\Models\Track;
 use App\DTO\AddTrack\AddTrackDTO;
+use App\Models\TrackImport;
 use App\Repositories\Artist\ArtistRepositoryInterface;
 use App\Repositories\Track\TrackRepositoryInterface;
 use App\Service\FileService\FileServiceInterface;
@@ -27,22 +29,17 @@ class TrackService implements TrackServiceInterface
     public function addTrackByFile(AddTrackDTO $dto, int $userId)
     {
         $file = $dto->file;
-        $getID3 = new getID3();
         $file = $this->fileService->addFile($file, 'audio');
-        $file = $this->fileService->convertMusicFile(storage_path('app/audio/'.$file));
-        $filePath = storage_path('app/audio/'.$file);
-        $fileInfo = $getID3->analyze($filePath);
-        $time = (int)round($fileInfo['playtime_seconds']);
         if($dto->cover != null) {
             $cover = $this->fileService->addFile($dto->cover, 'image/track', 'webp');
         }
-        $track = $this->trackRepository->create($dto->name, $time, $file, $cover ?? null, $userId);
+        $track = $this->trackRepository->createImport($dto->name, $file, $cover ?? null, '', false, $userId);
         $artistsArray = $dto->artists;
 
 
         $this->addArtistsToTrack($track, $artistsArray);
 
-        return $track->uuid;
+        ProcessImportTrack::dispatch($track->id)->onQueue('import');
     }
 
     public function addTrackByLink(AddTrackLinkDTO $dto, int $userId) {
@@ -51,27 +48,24 @@ class TrackService implements TrackServiceInterface
         $this->fileService->moveFile('audio/tmp/' . $file, 'audio/' . $file);
 
         $filePath = storage_path('app/audio/' . $file);
-        $getID3 = new getID3();
-        $fileInfo = $getID3->analyze($filePath);
 
-        $time = (int)round($fileInfo['playtime_seconds']);
         if($dto->cover != null) {
             $cover = $this->fileService->addFile($dto->cover, 'image/track', 'webp');
         } elseif ($dto->coverName != null) {
-            $cover = $dto->coverName;
+            $cover = basename($dto->coverName);
 
             $this->fileService->moveFile('image/tmp/' . $cover, 'image/track/' . $cover);
         }
 
-        $track = $this->trackRepository->create($dto->name, $time, $file, $cover ?? null, $userId);
+        $track = $this->trackRepository->createImport($dto->name, $file, $cover ?? null, '', false, $userId);
         $artistsArray = $dto->artists;
 
         $this->addArtistsToTrack($track, $artistsArray);
 
-        return $track->uuid;
+        ProcessImportTrack::dispatch($track->id)->onQueue('import');
     }
 
-    public function addArtistsToTrack(Track $track, array $artists)
+    public function addArtistsToTrack(Track|TrackImport $track, array $artists)
     {
         $artistsArray = $artists;
         $fileName = $track->image;

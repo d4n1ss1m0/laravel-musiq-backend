@@ -1,0 +1,18 @@
+[Unit]
+Description=Musiq Laravel Queue Worker
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/musiq
+ExecStart=/usr/bin/php artisan queue:work --queue=import,default --sleep=3 --tries=3 --timeout=600
+ExecReload=/usr/bin/php artisan queue:restart
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=3600
+
+[Install]
+WantedBy=multi-user.target
