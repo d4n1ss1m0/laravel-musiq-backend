@@ -46,6 +46,7 @@ class ProcessImportTrack implements ShouldQueue
 
 
         $filePath = storage_path('app/audio/'.$file);
+        $loudnessMetadata = $fileService->analyzeMusicFile($filePath);
         $fileInfo = $getID3->analyze($filePath);
         $time = (int)round($fileInfo['playtime_seconds']);
 
@@ -60,6 +61,9 @@ class ProcessImportTrack implements ShouldQueue
                 $importTrack->is_private,
                 $importTrack->user_id
             );
+            $finalTrack->integrated_lufs = $loudnessMetadata['integrated_lufs'];
+            $finalTrack->true_peak_db = $loudnessMetadata['true_peak_db'];
+            $finalTrack->save();
 
             $existsArtistsArray = TrackImportArtist::query()
                 ->where('track_id', $this->id)
