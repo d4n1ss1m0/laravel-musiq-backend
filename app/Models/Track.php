@@ -33,6 +33,8 @@ class Track extends Model
         'image',
         'is_private',
         'user_id',
+        'integrated_lufs',
+        'true_peak_db',
     ];
 
     public function artists() {

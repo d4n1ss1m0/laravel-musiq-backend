@@ -4,6 +4,7 @@ namespace App\Service\FileService;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\Process\Process;
 
 class FileService implements FileServiceInterface
 {
@@ -45,6 +46,48 @@ class FileService implements FileServiceInterface
         } catch (\Exception $e) {
             throw $e;
         }
+    }
+
+    /**
+     * @return array{integrated_lufs: float, true_peak_db: float}
+     */
+    public function analyzeMusicFile(string $path, int $timeout = 600): array
+    {
+        if (!is_file($path)) {
+            throw new \RuntimeException("Audio file not found: {$path}");
+        }
+
+        $process = new Process([
+            'ffmpeg',
+            '-hide_banner',
+            '-nostats',
+            '-i',
+            $path,
+            '-af',
+            'loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json',
+            '-f',
+            'null',
+            '-',
+        ]);
+        $process->setTimeout($timeout);
+        $process->run();
+
+        $output = $process->getErrorOutput() . "\n" . $process->getOutput();
+
+        if (!preg_match('/\{[\s\S]*"input_i"[\s\S]*\}/', $output, $matches)) {
+            throw new \RuntimeException('Could not parse FFmpeg loudnorm output.');
+        }
+
+        $data = json_decode($matches[0], true);
+
+        if (!is_array($data) || !isset($data['input_i'], $data['input_tp'])) {
+            throw new \RuntimeException('FFmpeg loudnorm output does not contain input_i or input_tp.');
+        }
+
+        return [
+            'integrated_lufs' => round((float) $data['input_i'], 2),
+            'true_peak_db' => round((float) $data['input_tp'], 2),
+        ];
     }
 
     public function moveFile(string $from, string $to): void
