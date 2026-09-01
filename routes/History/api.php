@@ -8,5 +8,6 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('history')
     ->middleware(\App\Http\Middleware\JwtAuthMiddleware::class)
     ->group(function () {
-    Route::post('/', [HistoryController::class, 'store']);
-});
+        Route::post('/', [HistoryController::class, 'store']);
+        Route::get('/', [HistoryController::class, 'get']);
+    });

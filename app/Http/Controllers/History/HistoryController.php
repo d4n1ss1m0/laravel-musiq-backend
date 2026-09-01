@@ -6,6 +6,7 @@ use App\DTO\History\HistoryItemDTO;
 use App\Enum\HistorySource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\History\AddToHistoryRequest;
+use App\Http\Requests\Utility\PaginateRequest;
 use App\Service\AuthService\AuthServiceInterface;
 use App\Service\HistoryService\HistoryServiceInterface;
 use App\Shared\Fields\Fields;
@@ -32,6 +33,19 @@ class HistoryController extends Controller
             $this->historyService->store($userId, $trackId, $sourceId, $source);
 
             return $this->success('success');
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function get(PaginateRequest $request)
+    {
+        try {
+            $userId = $request->attributes->get('userId');
+            $limit = (int) $request->query(Fields::PER_PAGE, 10);
+            $page = (int) $request->query(Fields::PAGE, 1);
+
+            return $this->success($this->historyService->get($userId, $limit, $page));
         } catch (\Exception $e) {
             return $this->error($e->getMessage());
         }
