@@ -2,29 +2,19 @@
 
 namespace App\Service\PlaybackService;
 
-use App\DTO\AddTrack\AddTrackLinkDTO;
 use App\DTO\Playback\SnapshotDTO;
-use App\Enum\MusicService;
 use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
 use App\Enum\SwitchTrackType;
 use App\Models\PlaybackSession\PlaybackSession;
 use App\Models\PlaybackSession\PlaybackSessionTrack;
-use App\Models\Playlist;
-use App\Models\Track;
-use App\DTO\AddTrack\AddTrackDTO;
 use App\Repositories\Artist\ArtistRepositoryInterface;
 use App\Repositories\Playback\PlaybackRepositoryInterface;
 use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Repositories\Track\TrackRepositoryInterface;
-use App\Service\FileService\FileServiceInterface;
-use App\Service\TrackService\TrackServiceInterface;
-use getID3;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\Process\Process;
 
 class PlaybackService implements PlaybackServiceInterface
 {
@@ -295,5 +285,22 @@ class PlaybackService implements PlaybackServiceInterface
         $session->state = $state;
         $session->save();
         return $session;
+    }
+
+    public function getQueue(int $userId, int $perPage): array
+    {
+        $session = $this->repository->getByUserId($userId);
+
+        if (!$session) {
+            throw new \Exception("Session not found");
+        }
+
+        $tracks = PlaybackSessionTrack::query()
+            ->where('session_id', $session->id)
+            ->with('track.artists')
+            ->orderBy('playback_position')
+            ->paginate(perPage: $perPage);
+
+        return [$session, $tracks];
     }
 }

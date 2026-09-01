@@ -6,7 +6,7 @@ use App\Enum\PlaybackSource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PlaybackSessionResource extends JsonResource
+class PlaybackQueueResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -22,11 +22,10 @@ class PlaybackSessionResource extends JsonResource
             ],
             'currentTrackId' => $this->currentTrack->uuid,
             'currentPosition' => $this->current_position,
-            'prev' => $this->previousQueueTrackId(),
-            'next' => $this->nextQueueTrackId(),
             'shuffle' => $this->shuffle,
             'repeatMode' => $this->repeat_mode->value,
-            'state' => $this->state->value
+            'state' => $this->state->value,
+            'tracks' => PlaybackTrackResource::collection($this->track)
         ];
     }
 }

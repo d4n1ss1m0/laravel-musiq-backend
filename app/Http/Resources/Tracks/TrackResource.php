@@ -6,7 +6,6 @@ use App\Http\Resources\Artist\ArtistsResource;
 use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class TrackResource extends JsonResource
 {
@@ -24,6 +23,10 @@ class TrackResource extends JsonResource
             'song' => $this->song,
             'artists' => ArtistsResource::collection($this->artists),
             'time' => $this->time,
+            'loudness' => [
+                'integratedLufs' => $this->integrated_lufs,
+                'truePeakDb' => $this->true_peak_db
+            ]
         ];
     }
 

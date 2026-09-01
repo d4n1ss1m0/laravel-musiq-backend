@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Middleware\JwtAuthMiddleware;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -15,5 +14,6 @@ Route::prefix('playback')
         Route::patch('repeat', [\App\Http\Controllers\Playback\PlaybackController::class, 'repeat']);
         Route::post('play', [\App\Http\Controllers\Playback\PlaybackController::class, 'play']);
         Route::post('pause', [\App\Http\Controllers\Playback\PlaybackController::class, 'pause']);
+        Route::get("/", [\App\Http\Controllers\Playback\PlaybackController::class, 'queue']);
     });
 

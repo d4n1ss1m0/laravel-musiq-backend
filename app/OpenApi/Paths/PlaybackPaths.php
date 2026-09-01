@@ -171,4 +171,53 @@ class PlaybackPaths
     public function pause(): void
     {
     }
+
+    #[OA\Get(
+        path: '/playback',
+        summary: 'Get playback queue',
+        description: 'Returns the current playback session and a paginated queue for the current user.',
+        security: [['tokenAuth' => []]],
+        tags: ['Playback'],
+        parameters: [
+            new OA\Parameter(
+                name: 'page',
+                in: 'query',
+                required: false,
+                schema: new OA\Schema(type: 'integer', minimum: 1),
+            ),
+            new OA\Parameter(
+                name: 'limit',
+                in: 'query',
+                required: false,
+                schema: new OA\Schema(type: 'integer', minimum: 1, maximum: 50),
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Playback queue',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ApiSuccessResponse'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(property: 'data', ref: '#/components/schemas/PlaybackQueuePaginatedData'),
+                            ],
+                            type: 'object',
+                        ),
+                    ],
+                ),
+            ),
+            new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Playback session not found'),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error',
+                content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse'),
+            ),
+        ],
+    )]
+    public function queue(): void
+    {
+    }
 }
