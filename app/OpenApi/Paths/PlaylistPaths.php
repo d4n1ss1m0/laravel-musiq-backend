@@ -227,17 +227,7 @@ class PlaylistPaths
             new OA\Response(
                 response: 200,
                 description: 'Playlist created',
-                content: new OA\JsonContent(
-                    allOf: [
-                        new OA\Schema(ref: '#/components/schemas/ApiSuccessResponse'),
-                        new OA\Schema(
-                            properties: [
-                                new OA\Property(property: 'data', ref: '#/components/schemas/Playlist'),
-                            ],
-                            type: 'object',
-                        ),
-                    ],
-                ),
+                content: new OA\JsonContent(ref: '#/components/schemas/PlaylistResourceResponse'),
             ),
             new OA\Response(response: 401, description: 'Unauthorized'),
             new OA\Response(
