@@ -19,8 +19,8 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - DB_CONNECTION=pgsql
-      - DB_HOST=db
-      - DB_PORT=5432
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5433
       - DB_DATABASE=musiq
       - DB_USERNAME=musiq
       - DB_PASSWORD=musiq
@@ -35,8 +35,6 @@ services:
     dns:
       - 8.8.8.8
       - 1.1.1.1
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     environment:
       - COMPOSER_NO_INTERACTION=1
       - COMPOSER_PREFER_DIST=1
