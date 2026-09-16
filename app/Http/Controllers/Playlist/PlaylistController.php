@@ -37,7 +37,7 @@ class PlaylistController extends Controller
     {
         try {
             $playlist = $this->playlistService->getPlaylist($playlistId);
-            return new PlaylistResource($playlist);
+            return $this->success(new PlaylistResource($playlist));
         } catch (ModelNotFoundException $e) {
             return $this->error($e->getMessage(), 'NotFound', $e->getCode());
         } catch (\Throwable $e) {

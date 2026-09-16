@@ -16,15 +16,25 @@ use OpenApi\Attributes as OA;
             items: new OA\Items(type: 'string', example: '/image/playlist/cover.webp'),
             example: ['/image/playlist/cover.webp'],
         ),
-        new OA\Property(property: 'type', type: 'string', enum: ['public', 'private', 'favourite'], example: 'public'),
+        new OA\Property(
+            property: 'type',
+            required: ['id', 'name'],
+            properties: [
+                new OA\Property(property: 'id', type: 'integer', example: 1),
+                new OA\Property(property: 'name', type: 'string', enum: ['public', 'private', 'favourite'], example: 'public'),
+            ],
+            type: 'object',
+        ),
     ],
     type: 'object',
 )]
 #[OA\Schema(
     schema: 'PlaylistResourceResponse',
-    required: ['data'],
+    required: ['data', 'status', 'code'],
     properties: [
         new OA\Property(property: 'data', ref: '#/components/schemas/Playlist'),
+        new OA\Property(property: 'status', type: 'string', example: 'success'),
+        new OA\Property(property: 'code', type: 'integer', example: 200),
     ],
     type: 'object',
 )]
