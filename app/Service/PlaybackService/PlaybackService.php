@@ -3,12 +3,14 @@
 namespace App\Service\PlaybackService;
 
 use App\DTO\Playback\SnapshotDTO;
+use App\Enum\PlaybackManualType;
 use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
 use App\Enum\SwitchTrackType;
 use App\Models\PlaybackSession\PlaybackSession;
 use App\Models\PlaybackSession\PlaybackSessionTrack;
+use App\Models\TrackPlaylist;
 use App\Repositories\Artist\ArtistRepositoryInterface;
 use App\Repositories\Playback\PlaybackRepositoryInterface;
 use App\Repositories\Playlist\PlaylistRepositoryInterface;
@@ -302,5 +304,73 @@ class PlaybackService implements PlaybackServiceInterface
             ->paginate(perPage: $perPage);
 
         return [$session, $tracks];
+    }
+
+    public function addToQueue(int $userId, PlaybackManualType $type, string $trackId)
+    {
+        $session = $this->repository->getByUserId($userId);
+        $track = $this->trackRepository->getTrackByUuids([$trackId])[0];
+
+        DB::transaction(function () use ($session, $track, $userId, $type, $trackId) {
+            if ($type == PlaybackManualType::NEXT) {
+
+                $nextTrack = PlaybackSessionTrack::query()
+                    ->where('session_id', $session->id)
+                    ->where('playback_position', $session->current_position + 1)
+                    ->first();
+
+                PlaybackSessionTrack::query()
+                    ->where('session_id', $session->id)
+                    ->where('source_position', '>=', $nextTrack->source_position)
+                    ->update([
+                        'source_position' => DB::raw('"source_position" + 100000'),
+                    ]);
+
+                PlaybackSessionTrack::query()
+                    ->where('session_id', $session->id)
+                    ->where('source_position', '>=', $nextTrack->source_position)
+                    ->update([
+                        'source_position' => DB::raw('"source_position" - 99999'),
+                    ]);
+
+
+                PlaybackSessionTrack::query()
+                    ->where('session_id', $session->id)
+                    ->where('playback_position', '>=', $nextTrack->playback_position)
+                    ->update([
+                        'playback_position' => DB::raw('"playback_position" + 100000'),
+                    ]);
+
+                PlaybackSessionTrack::query()
+                    ->where('session_id', $session->id)
+                    ->where('playback_position', '>=', $nextTrack->playback_position)
+                    ->update([
+                        'playback_position' => DB::raw('"playback_position" - 99999'),
+                    ]);
+
+
+
+                PlaybackSessionTrack::create([
+                    'session_id' => $session->id,
+                    'source_position' => $nextTrack->source_position,
+                    'playback_position' => $nextTrack->playback_position,
+                    'track_id' => $track->id,
+                ]);
+            } else {
+                $maxSourcePosition = PlaybackSessionTrack::query()
+                    ->where('session_id', $session->id)
+                    ->max('source_position');
+                $maxPlaybackPosition = PlaybackSessionTrack::query()
+                    ->where('session_id', $session->id)
+                    ->max('playback_position');
+
+                PlaybackSessionTrack::create([
+                    'session_id' => $session->id,
+                    'source_position' => $maxSourcePosition + 1,
+                    'playback_position' => $maxPlaybackPosition + 1,
+                    'track_id' => $track->id,
+                ]);
+            }
+        });
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Playback;
 
 use App\DTO\Playback\QueueResponseDTO;
 use App\DTO\Playback\SnapshotDTO;
+use App\Enum\PlaybackManualType;
 use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
@@ -133,6 +134,21 @@ class PlaybackController extends Controller
             return $this->success($this->paginator($keyValueArray->getResponse(), $queue->total(), $queue->perPage(), $queue->currentPage()));
         } catch (\Throwable $t) {
             return $this->error($t->getMessage());
+        }
+    }
+
+    public function add(Request $request)
+    {
+        try {
+            $userId = $request->attributes->get(Fields::USER_ID);
+            $trackId = $request->input(Fields::ID);
+            $type = $request->input(Fields::TYPE);
+            $type = PlaybackManualType::tryFrom($type);
+
+            $this->playbackService->addToQueue($userId, $type, $trackId);
+            return $this->success('success');
+        } catch (\Throwable $e) {
+            return $this->error($e->getMessage());
         }
     }
 }
