@@ -38,12 +38,14 @@ class MediatekaRepository implements MediatekaRepositoryInterface
             ->where('libraryable_type', $mediatekaItems->getModel())
             ->where('libraryable_id', $itemId)
             ->where('user_id', $userId)
+            ->lockForUpdate()
             ->first();
     }
 
     public function pinItem(MediatekaItem $item, int $pinPosition): void
     {
-        $item->update([
+        $item
+            ->update([
             'pinned_at' => Carbon::now(),
             'pin_position' => $pinPosition
         ]);
@@ -51,10 +53,18 @@ class MediatekaRepository implements MediatekaRepositoryInterface
 
     public function unpinItem(MediatekaItem $item): void
     {
+        $removedPosition = $item->pin_position;
+
         $item->update([
             'pinned_at' => null,
             'pin_position' => null
         ]);
+
+        MediatekaItem::query()
+            ->where('user_id', $item->user_id)
+            ->whereNotNull('pin_position')
+            ->where('pin_position', '>', $removedPosition)
+            ->decrement('pin_position');
     }
 
     public function getMaxPinValue(int $userId): int
