@@ -31,8 +31,8 @@ class MediatekaController extends Controller
             $orderBy = OrderBy::tryFrom($request->input(Fields::ORDER)) ?? OrderBy::CREATED_AT;
 
             $mediateka = $this->mediatekaService->getMediateka($userId, $orderBy, $request->get('query') ?? '');
-            return MediatekaItemResource::collection($mediateka);
-        } catch ( \Exception $e) {
+            return $this->success(MediatekaItemResource::collection($mediateka));
+        } catch (\Exception $e) {
             return $this->error($e->getMessage());
         }
     }
