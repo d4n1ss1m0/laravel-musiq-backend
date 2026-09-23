@@ -26,74 +26,55 @@ class MediatekaController extends Controller
 
     public function getMediateka(MediatekaRequest $request)
     {
-        try {
-            $userId = $request->attributes->get(Fields::USER_ID);
-            $orderBy = OrderBy::tryFrom($request->input(Fields::ORDER)) ?? OrderBy::CREATED_AT;
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $orderBy = OrderBy::tryFrom($request->input(Fields::ORDER)) ?? OrderBy::CREATED_AT;
 
-            $mediateka = $this->mediatekaService->getMediateka($userId, $orderBy, $request->get('query') ?? '');
-            return $this->success(MediatekaItemResource::collection($mediateka));
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage());
-        }
+        $mediateka = $this->mediatekaService->getMediateka($userId, $orderBy, $request->get('query') ?? '');
+
+        return $this->success(MediatekaItemResource::collection($mediateka));
     }
 
     public function addMedia(MediaUUIDRequest $request, string $type)
     {
-        try{
-            $userId = $request->attributes->get(Fields::USER_ID);
-            $mediaId = $request->input(Fields::ID);
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $mediaId = $request->input(Fields::ID);
 
-            $mediaType = MediatekaItemType::tryFrom($type);
+        $mediaType = MediatekaItemType::tryFrom($type);
 
-            $this->mediatekaService->addMedia($mediaType, $mediaId, $userId);
+        $this->mediatekaService->addMedia($mediaType, $mediaId, $userId);
 
-            return $this->success('success');
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage());
-        }
+        return $this->success('success');
     }
 
     public function removeMedia(MediaUUIDRequest $request, string $type)
     {
-        try{
-            $userId = $request->attributes->get(Fields::USER_ID);
-            $mediaId = $request->input(Fields::ID);
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $mediaId = $request->input(Fields::ID);
 
-            $mediaType = MediatekaItemType::tryFrom($type);
+        $mediaType = MediatekaItemType::tryFrom($type);
 
-            $this->mediatekaService->removeMedia($mediaType, $mediaId, $userId);
+        $this->mediatekaService->removeMedia($mediaType, $mediaId, $userId);
 
-            return $this->success('success');
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage());
-        }
+        return $this->success('success');
     }
 
     public function pinItem(MediaUUIDRequest $request, string $type)
     {
-        try {
-            $userId = $request->attributes->get(Fields::USER_ID);
-            $mediaId = $request->input(Fields::ID);
-            $type = MediatekaItemType::tryFrom($type);
-            $this->mediatekaService->pinMedia($type, $mediaId, $userId);
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $mediaId = $request->input(Fields::ID);
+        $type = MediatekaItemType::tryFrom($type);
+        $this->mediatekaService->pinMedia($type, $mediaId, $userId);
 
-            return $this->success('success');
-        } catch ( \Exception $e) {
-            return $this->error($e->getMessage());
-        }
+        return $this->success('success');
     }
 
     public function unpinItem(MediaUUIDRequest $request, string $type)
     {
-        try {
-            $userId = $request->attributes->get(Fields::USER_ID);
-            $mediaId = $request->input(Fields::ID);
-            $type = MediatekaItemType::tryFrom($type);
-            $this->mediatekaService->unpinMedia($type, $mediaId, $userId);
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $mediaId = $request->input(Fields::ID);
+        $type = MediatekaItemType::tryFrom($type);
+        $this->mediatekaService->unpinMedia($type, $mediaId, $userId);
 
-            return $this->success('success');
-        } catch ( \Exception $e) {
-            return $this->error($e->getMessage());
-        }
+        return $this->success('success');
     }
 }

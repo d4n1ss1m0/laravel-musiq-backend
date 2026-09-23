@@ -35,162 +35,118 @@ class PlaylistController extends Controller
 
     public function getPlaylist(string $playlistId)
     {
-        try {
-            $playlist = $this->playlistService->getPlaylist($playlistId);
-            return $this->success(new PlaylistResource($playlist));
-        } catch (ModelNotFoundException $e) {
-            return $this->error($e->getMessage(), 'NotFound', $e->getCode());
-        } catch (\Throwable $e) {
-            return $this->error($e->getMessage(), 'error', $e->getCode());
-        }
-
+        $playlist = $this->playlistService->getPlaylist($playlistId);
+        return $this->success(new PlaylistResource($playlist));
     }
 
     public function getTracks(string $playlistId, SearchPaginateRequest $request)
     {
         $perPage = $request->query(Fields::PER_PAGE, config('app.per_page_default'));
         $query = $request->query(Fields::QUERY);
-        try {
-            $tracks = $this->playlistService->getTracks($playlistId, $perPage, $query);
-            $keyValueArray = [
-                Fields::ITEMS => TrackResource::collection($tracks),
-            ];
-            return $this->success(
-                $this->paginator(
-                    $keyValueArray,
-                    $tracks->total(),
-                    $tracks->perPage(),
-                    $tracks->currentPage()
-                )
-            );
-        } catch (ModelNotFoundException $e) {
-            return $this->error($e->getMessage(), 'NotFound', $e->getCode());
-        } catch (\Throwable $e) {
-            return $this->error($e->getMessage(), 'error', $e->getCode());
-        }
+
+        $tracks = $this->playlistService->getTracks($playlistId, $perPage, $query);
+        $keyValueArray = [
+            Fields::ITEMS => TrackResource::collection($tracks),
+        ];
+
+        return $this->success(
+            $this->paginator(
+                $keyValueArray,
+                $tracks->total(),
+                $tracks->perPage(),
+                $tracks->currentPage()
+            )
+        );
     }
 
     public function getQueue(string $playlistId, Request $request)
     {
-        try {
-            $tracks = $this->playlistService->getQueue($playlistId);
-            return $this->success($tracks);
-        } catch (ModelNotFoundException $e) {
-            return $this->error($e->getMessage(), 'NotFound', $e->getCode());
-        } catch (\Throwable $e) {
-            return $this->error($e->getMessage(), 'error', $e->getCode());
-        }
+        $tracks = $this->playlistService->getQueue($playlistId);
+        return $this->success($tracks);
     }
 
     public function create(CreatePlaylistRequest $request)
     {
         $userId = $request->get('userId');
-        try {
-            if ($request->hasFile(Fields::FILE)) {
-                $cover = $this->fileService->addFile($request->file(Fields::FILE), 'image/playlist', 'webp');
-            }
-
-            $dto = new CreatePlaylistDTO($cover ?? null,
-                $request->input(Fields::NAME),
-                PlaylistTypes::tryFrom($request->input(Fields::TYPE))
-            );
-
-            $playlist = $this->playlistService->createPlaylist($dto, $userId);
-
-            return $this->success(new PlaylistResource($playlist));
-        } catch (\Throwable $e) {
-            return $this->error($e->getMessage(), 'error', 500);
+        if ($request->hasFile(Fields::FILE)) {
+            $cover = $this->fileService->addFile($request->file(Fields::FILE), 'image/playlist', 'webp');
         }
+
+        $dto = new CreatePlaylistDTO($cover ?? null,
+            $request->input(Fields::NAME),
+            PlaylistTypes::tryFrom($request->input(Fields::TYPE))
+        );
+
+        $playlist = $this->playlistService->createPlaylist($dto, $userId);
+
+        return $this->success(new PlaylistResource($playlist));
     }
 
     public function addTrack(string $playlistId, AddTrackToPlaylistRequest $request)
     {
-        try {
-            $this->playlistService->addTrackToPlaylist($playlistId, $request->input(Fields::IDS));
-            return $this->success(['message' => 'Track added', 'playlistId' => $playlistId, 'tracksIds' => $request->input(Fields::IDS)]);
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 'error', $e->getCode());
-        }
+        $this->playlistService->addTrackToPlaylist($playlistId, $request->input(Fields::IDS));
+
+        return $this->success(['message' => 'Track added', 'playlistId' => $playlistId, 'tracksIds' => $request->input(Fields::IDS)]);
     }
 
     public function removeTrack(string $playlistId, ManyTracksRequest $request)
     {
-        try {
-            $this->playlistService->removeTrackFromPlaylist($playlistId, $request->input(Fields::IDS));
-            return $this->success(['message' => 'Track removed']);
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 'error', $e->getCode());
-        }
+        $this->playlistService->removeTrackFromPlaylist($playlistId, $request->input(Fields::IDS));
 
+        return $this->success(['message' => 'Track removed']);
     }
 
     public function order(string $playlistId, ChangeTrackOrderRequest $request)
     {
-        try {
-            $this->playlistService->changeOrder($playlistId, $request->input(Fields::ID), $request->input(Fields::ORDER));
-            return $this->success(['message' => 'Order changed']);
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 'error', $e->getCode());
-        }
+        $this->playlistService->changeOrder($playlistId, $request->input(Fields::ID), $request->input(Fields::ORDER));
+
+        return $this->success(['message' => 'Order changed']);
     }
 
     public function update(string $playlistId, UpdatePlaylistRequest $request)
     {
-        try {
-            if ($request->hasFile(Fields::FILE)) {
-                $path = $this->fileService->addFile($request->file(Fields::FILE), 'image/playlist', 'webp');
-            }
-            $playlistDTO = new UpdatePlaylistDTO(
-                $path ?? null,
-                $request->input(Fields::NAME),
-                $request->input(Fields::TYPE)? PlaylistTypes::tryFrom($request->input(Fields::TYPE)) : null
-            );
-            $this->playlistService->updatePlaylist($playlistId, $playlistDTO);
-            return $this->success(['message' => 'Playlist updated']);
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 'error', $e->getCode());
+        if ($request->hasFile(Fields::FILE)) {
+            $path = $this->fileService->addFile($request->file(Fields::FILE), 'image/playlist', 'webp');
         }
+
+        $playlistDTO = new UpdatePlaylistDTO(
+            $path ?? null,
+            $request->input(Fields::NAME),
+            $request->input(Fields::TYPE)? PlaylistTypes::tryFrom($request->input(Fields::TYPE)) : null
+        );
+
+        $this->playlistService->updatePlaylist($playlistId, $playlistDTO);
+
+        return $this->success(['message' => 'Playlist updated']);
     }
 
     public function delete(string $playlistId)
     {
-        try {
-            $this->playlistService->deletePlaylist($playlistId);
-            return $this->success(['message' => 'Playlist deleted']);
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 'error', $e->getCode());
-        }
+        $this->playlistService->deletePlaylist($playlistId);
+
+        return $this->success(['message' => 'Playlist deleted']);
     }
 
     public function importFromPlaylist(string $playlistId, ImportFromPlaylistRequest $request)
     {
-        try {
-            $this->playlistService->importFromPlaylist($request->input(Fields::ID), $playlistId);
-            return $this->success(['message' => 'Playlist imported']);
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 'error', $e->getCode());
-        }
+        $this->playlistService->importFromPlaylist($request->input(Fields::ID), $playlistId);
+
+        return $this->success(['message' => 'Playlist imported']);
     }
 
     public function addFavourite(AddTrackToFavouriteRequest $request)
     {
-        try {
-            $userId = $request->attributes->get(Fields::USER_ID);
-            $this->playlistService->addToFavourite($userId, $request->input(Fields::IDS));
-            return $this->success(['message' => 'Track added']);
-        } catch (\Throwable $th) {
-            return $this->error($th->getMessage());
-        }
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $this->playlistService->addToFavourite($userId, $request->input(Fields::IDS));
+
+        return $this->success(['message' => 'Track added']);
     }
 
     public function removeFavourite(RemoveTrackFromFavouriteRequest $request)
     {
-        try {
-            $userId = $request->attributes->get(Fields::USER_ID);
-            $this->playlistService->removeFromFavourite($userId, $request->input(Fields::IDS));
-            return $this->success(['message' => 'Track removed']);
-        } catch (\Throwable $th) {
-            return $this->error($th->getMessage());
-        }
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $this->playlistService->removeFromFavourite($userId, $request->input(Fields::IDS));
+
+        return $this->success(['message' => 'Track removed']);
     }
 }

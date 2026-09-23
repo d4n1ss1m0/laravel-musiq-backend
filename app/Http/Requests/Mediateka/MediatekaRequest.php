@@ -43,8 +43,8 @@ class MediatekaRequest extends FormRequest
     public function messages()
     {
         return [
-            sprintf('%s.required', Fields::ID) => 'Необходимо указать id медиа',
-            sprintf('%s.string', Fields::ID) => 'Необходимо указать id медиа в виде строки',
+            sprintf('%s.required', Fields::ORDER) => 'Необходимо указать сортировку',
+            sprintf('%s.string', Fields::ORDER) => 'Необходимо указать сортировку в виде строки',
         ];
     }
 
