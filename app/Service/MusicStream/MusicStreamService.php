@@ -2,14 +2,9 @@
 
 namespace App\Service\MusicStream;
 
-use App\Http\Requests\Auth\LoginRequest;
-use App\Models\Track;
-use App\Models\User;
-use App\Service\Auth\AuthServiceInterface;
-use Illuminate\Auth\AuthenticationException;
+use App\Exceptions\ApiException;
+use App\Exceptions\NotFoundException;
 use Illuminate\Support\Facades\Log;
-use Laravel\Sanctum\PersonalAccessToken;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MusicStreamService implements MusicStreamServiceInterface
 {
@@ -17,7 +12,7 @@ class MusicStreamService implements MusicStreamServiceInterface
     {
         // Проверяем, существует ли файл
         if (!file_exists($filePath)) {
-            abort(404);
+            throw new NotFoundException('File not found');
         }
 
         // Получаем размер файла
@@ -32,7 +27,7 @@ class MusicStreamService implements MusicStreamServiceInterface
             // Убедитесь, что диапазон корректен
             if ($start > $end || $start > $fileSize - 1) {
                 Log::info("MusicStream: {$start}-{$end}/{$fileSize}");
-                throw new \Exception('Requested range not satisfiable', 416);
+                throw new ApiException('Requested range not satisfiable', 416);
             }
 
             if ($end === null || $end >= $fileSize) {
