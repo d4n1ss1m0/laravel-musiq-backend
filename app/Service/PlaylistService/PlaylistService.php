@@ -5,6 +5,7 @@ namespace App\Service\PlaylistService;
 use App\DTO\Playlist\CreatePlaylistDTO;
 use App\DTO\Playlist\PlaylistTrackDTO;
 use App\DTO\Playlist\UpdatePlaylistDTO;
+use App\Exceptions\NotFoundException;
 use App\Models\Playlist;
 use App\Models\Track;
 use App\Models\TrackPlaylist;
@@ -31,7 +32,7 @@ class PlaylistService implements PlaylistServiceInterface
         try {
             return Playlist::query()->where('uuid', $playlistId)->firstOrFail();
         } catch (ModelNotFoundException $e) {
-            throw new ModelNotFoundException('Playlist not found', 404);
+            throw new NotFoundException('Playlist not found');
         }
     }
 
@@ -48,26 +49,23 @@ class PlaylistService implements PlaylistServiceInterface
                 ->paginate($perPage);
             return $tracks;
         } catch (ModelNotFoundException $e) {
-            throw new ModelNotFoundException('Playlist not found', 404);
+            throw new NotFoundException('Playlist not found');
         }
     }
 
     public function getQueue(string $playlistId)
     {
-        try {
-            return TrackPlaylist::query()
-                ->join('tracks', 'tracks.id', '=', 'track_playlists.track_id')
-                ->join('playlists', 'playlists.id', '=', 'track_playlists.playlist_id')
-                ->where('playlists.uuid', $playlistId)
-                ->orderBy('track_playlists.order')
-                ->get([
-                    'track_playlists.id as playlist_item_id',
-                    'tracks.uuid as track_id',
-                    'track_playlists.order as position',
-                ])->toArray();
-        } catch (ModelNotFoundException $e) {
-            throw new ModelNotFoundException('Playlist not found', 404);
-        }
+        $this->getPlaylist($playlistId);
+        return TrackPlaylist::query()
+            ->join('tracks', 'tracks.id', '=', 'track_playlists.track_id')
+            ->join('playlists', 'playlists.id', '=', 'track_playlists.playlist_id')
+            ->where('playlists.uuid', $playlistId)
+            ->orderBy('track_playlists.order')
+            ->get([
+                'track_playlists.id as playlist_item_id',
+                'tracks.uuid as track_id',
+                'track_playlists.order as position',
+            ])->toArray();
     }
 
     private function getPlaylistWithAccess($playlistId, $userId)
@@ -91,7 +89,7 @@ class PlaylistService implements PlaylistServiceInterface
 
     public function addTrackToPlaylist(string $playlistId, array $trackIds): void
     {
-        $playlist = Playlist::query()->where('uuid', $playlistId)->firstOrFail();
+        $playlist = $this->getPlaylist($playlistId);
         $this->addTracks($playlist, $trackIds);
     }
 
@@ -118,19 +116,33 @@ class PlaylistService implements PlaylistServiceInterface
     public function removeTrackFromPlaylist(string $playlistId, array $trackId): void
     {
         $playlistIntId = Playlist::query()->where('uuid', $playlistId)->value('id');
+        if (empty($playlistIntId)) {
+            throw new NotFoundException('Playlist not found');
+        }
         $this->repository->removeTracks($playlistIntId, $trackId);
     }
 
     public function changeOrder(string $playlistId, string $trackId, int $order)
     {
         $playlistIntId = Playlist::query()->where('uuid', $playlistId)->value('id');
+        if (empty($playlistIntId)) {
+            throw new NotFoundException('Playlist not found');
+        }
         $trackIntId = Track::query()->where('uuid', $trackId)->value('id');
+        if (empty($trackIntId)) {
+            throw new NotFoundException('Track not found');
+        }
         $this->repository->updateOrder($playlistIntId, $trackIntId, $order);
     }
 
     public function updatePlaylist(string $playlistId, UpdatePlaylistDTO $dto)
     {
-        $playlist = Playlist::query()->where('uuid', $playlistId)->select('id', 'image')->firstOrFail();
+        try {
+            $playlist = Playlist::query()->where('uuid', $playlistId)->select('id', 'image')->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException('Playlist not found');
+        }
+
         if ($dto->cover) {
             $oldPath = $playlist->image;
             if ($oldPath) {
@@ -143,7 +155,7 @@ class PlaylistService implements PlaylistServiceInterface
 
     public function deletePlaylist(string $playlistId)
     {
-        $playlist = Playlist::query()->where('uuid', $playlistId)->firstOrFail();
+        $playlist = $this->getPlaylist($playlistId);
         if ($playlist->image) {
             $this->imageService->deleteFile("image/playlist/$playlist->image");
         }
@@ -154,9 +166,27 @@ class PlaylistService implements PlaylistServiceInterface
     public function importFromPlaylist(string $fromId, string $toId)
     {
         DB::transaction(function () use ($fromId, $toId) {
-            $fromPlaylistTracks = Playlist::query()->where('uuid', $fromId)->firstOrFail()->tracks()->orderByPivot('order')->pluck('tracks.id');
-            $toPlaylist = Playlist::query()->where('uuid', $toId)->select(['id'])->firstOrFail();
-            $toPlaylistTracks = $toPlaylist->tracks()->get(['tracks.id'])->keyBy('id')->toArray();
+            try {
+                $fromPlaylistTracks = Playlist::query()
+                    ->where('uuid', $fromId)
+                    ->firstOrFail()
+                    ->tracks()
+                    ->orderByPivot('order')->pluck('tracks.id');
+
+                $toPlaylist = Playlist::query()
+                    ->where('uuid', $toId)
+                    ->select(['id'])
+                    ->firstOrFail();
+            } catch (ModelNotFoundException $e) {
+                throw new NotFoundException('Playlist not found');
+            }
+
+            $toPlaylistTracks = $toPlaylist
+                ->tracks()
+                ->get(['tracks.id'])
+                ->keyBy('id')
+                ->toArray();
+
             $toPlaylistIntId = $toPlaylist->id;
             TrackPlaylist::query()
                 ->where('playlist_id', $toPlaylistIntId)
@@ -177,20 +207,27 @@ class PlaylistService implements PlaylistServiceInterface
 
     public function addToFavourite(int $userId, array $trackIds): void
     {
-        $playlist = Playlist::query()
-            ->where('user_id', $userId)
-            ->where('type', PlaylistTypes::FAVOURITE->getId())
-            ->firstOrFail();
+        try {
+            $playlist = Playlist::query()
+                ->where('user_id', $userId)
+                ->where('type', PlaylistTypes::FAVOURITE->getId())
+                ->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException('Playlist not found');
+        }
 
         $this->addTracks($playlist, $trackIds);
-
     }
 
     public function removeFromFavourite(int $userId, array $trackIds): void
     {
         $playlistIntId = Playlist::query()
             ->where('user_id', $userId)
-            ->where('type', PlaylistTypes::FAVOURITE->getId())->value('id');
+            ->where('type', PlaylistTypes::FAVOURITE->getId())
+            ->value('id');
+        if (empty($playlistIntId)) {
+            throw new NotFoundException('Playlist not found');
+        }
         $this->repository->removeTracks($playlistIntId, $trackIds);
     }
 }

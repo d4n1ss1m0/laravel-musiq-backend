@@ -2,12 +2,14 @@
 
 namespace App\Repositories\Playlist;
 
+use App\Exceptions\NotFoundException;
 use App\Models\Playlist;
 use App\Models\PlaylistType;
 use App\Models\Track;
 use App\Models\TrackPlaylist;
 use App\Repositories\Track\TrackRepositoryInterface;
 use App\Shared\Enums\PlaylistTypes;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -50,11 +52,16 @@ class PlaylistRepository implements PlaylistRepositoryInterface
     public function updateOrder(int $playlistId, int $trackId, int $order)
     {
         DB::transaction(function () use ($playlistId, $trackId, $order) {
-            $item = TrackPlaylist::query()
-                ->where('playlist_id', $playlistId)
-                ->where('track_id', $trackId)
-                ->lockForUpdate()
-                ->firstOrFail();
+            try {
+                $item = TrackPlaylist::query()
+                    ->where('playlist_id', $playlistId)
+                    ->where('track_id', $trackId)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+            } catch (ModelNotFoundException $e) {
+                throw new NotFoundException('Track not found');
+            }
+
 
             $currentOrder = $item->order;
 

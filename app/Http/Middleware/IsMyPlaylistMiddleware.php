@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Enum\MediatekaItemType;
+use App\Exceptions\NotFoundException;
 use App\Models\Playlist;
 use App\Shared\Enums\PlaylistTypes;
 use App\Shared\Fields\Fields;
@@ -28,23 +29,26 @@ class IsMyPlaylistMiddleware
         $userId = $request->attributes->get(Fields::USER_ID);
 
         $playlist = Playlist::query()->where('uuid', $playlistId)->first();
+        if (!$playlist) {
+            throw new NotFoundException('Playlist not found');
+        }
 
         $playlistOwner = $playlist->user_id;
 
         if (!$playlistOwner) {
-            return response()->json(['error' => 'Playlist not found'], 404);
+            throw new NotFoundException('Playlist not found');
         }
 
         $isOwnerValue = $playlistOwner == $userId;
 
         if ($isOwnerValue !== $shouldBeOwner) {
-            return response()->json(['error' => 'Playlist not found'], 404);
+            throw new NotFoundException('Playlist not found');
         }
 
         if (!$isOwnerValue) {
             $isPublic = $playlist->type === PlaylistTypes::PUBLIC->getId();
             if (!$isPublic) {
-                return response()->json(['error' => 'Playlist not found'], 404);
+                throw new NotFoundException('Playlist not found');
             }
         }
 

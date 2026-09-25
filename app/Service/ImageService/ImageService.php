@@ -2,9 +2,7 @@
 
 namespace App\Service\ImageService;
 
-use App\Service\AuthService\AuthServiceInterface;
-use App\Service\JwtService\JwtService;
-use App\Repositories\User\UserRepositoryInterface;
+use App\Exceptions\NotFoundException;
 use Illuminate\Support\Facades\Storage;
 
 class ImageService implements ImageServiceInterface
@@ -13,7 +11,7 @@ class ImageService implements ImageServiceInterface
         $path = 'image/'.$path;
         //dd($path);
         if (!Storage::exists($path)) {
-            throw new \Exception("File not found");
+            throw new NotFoundException('File not found');
         }
 
         $file = Storage::get($path);

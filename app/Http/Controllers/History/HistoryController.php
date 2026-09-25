@@ -23,19 +23,15 @@ class HistoryController extends Controller
 
     public function store(AddToHistoryRequest $request)
     {
-        try {
-            $userId = $request->attributes->get('userId');
-            $sourceString = $request->input(Fields::SOURCE);
-            $source = HistorySource::tryFrom($sourceString);
-            $trackId = $request->input(Fields::ID);
-            $sourceId = $request->input(Fields::SOURCE_ID);
+        $userId = $request->attributes->get('userId');
+        $sourceString = $request->input(Fields::SOURCE);
+        $source = HistorySource::tryFrom($sourceString);
+        $trackId = $request->input(Fields::ID);
+        $sourceId = $request->input(Fields::SOURCE_ID);
 
-            $this->historyService->store($userId, $trackId, $sourceId, $source);
+        $this->historyService->store($userId, $trackId, $sourceId, $source);
 
-            return $this->success('success');
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage());
-        }
+        return $this->success('success');
     }
 
     public function get(PaginateRequest $request)

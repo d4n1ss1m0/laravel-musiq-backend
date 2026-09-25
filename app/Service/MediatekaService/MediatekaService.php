@@ -5,6 +5,9 @@ namespace App\Service\MediatekaService;
 use App\Contracts\MediatekaLibraryable;
 use App\Enum\MediatekaItemType;
 use App\Enum\OrderBy;
+use App\Exceptions\BusinessRuleException;
+use App\Exceptions\ConflictException;
+use App\Exceptions\NotFoundException;
 use App\Models\Artist;
 use App\Models\ListeningHistoryItem;
 use App\Models\Mediateka\MediatekaItem;
@@ -94,12 +97,12 @@ class MediatekaService implements MediatekaServiceInterface
             );
 
             if ($mediatekaItem) {
-                throw new \Exception('This media already in mediateka');
+                throw new ConflictException('This media already in mediateka');
             }
 
             $media = $this->getLibraryableByUUID($mediatekaType, $mediaId);
             if (!$media) {
-                throw new \Exception('Media not found');
+                throw new NotFoundException('Media not found');
             }
 
             $this->repository->addMedia($media, $userId);
@@ -116,7 +119,11 @@ class MediatekaService implements MediatekaServiceInterface
             );
 
             if (!$mediatekaItem) {
-                throw new \Exception('This media not in mediateka');
+                throw new ConflictException('This media not in mediateka');
+            }
+
+            if ($mediatekaItem->isPinned()) {
+                $this->repository->unpinItem($mediatekaItem);
             }
 
             $this->repository->removeMedia($mediatekaItem->libraryable, $userId);
@@ -137,17 +144,17 @@ class MediatekaService implements MediatekaServiceInterface
             $maxPin = $this->repository->getMaxPinValue($userId);
 
             if ($maxPin == self::MAX_PIN) {
-                throw new \Exception('Maximum number of pins reached');
+                throw new BusinessRuleException('Maximum number of pins reached');
             }
 
             $mediatekaItem = $this->repository->getMediatekaItem($mediatekaType, $mediaId, $userId);
 
             if (!$mediatekaItem) {
-                throw new \Exception('Media not found in mediateka');
+                throw new NotFoundException('Media not found in mediateka');
             }
 
             if ($mediatekaItem->isPinned()) {
-                throw new \Exception('This media is already pinned');
+                throw new ConflictException('This media is already pinned');
             }
 
             $this->repository->pinItem($mediatekaItem, ++$maxPin);
@@ -160,11 +167,11 @@ class MediatekaService implements MediatekaServiceInterface
             $mediatekaItem = $this->repository->getMediatekaItem($mediatekaType, $mediaId, $userId);
 
             if (!$mediatekaItem) {
-                throw new \Exception('Media not found in mediateka');
+                throw new NotFoundException('Media not found in mediateka');
             }
 
             if (!$mediatekaItem->isPinned()) {
-                throw new \Exception('This media is not pinned');
+                throw new NotFoundException('This media is not pinned');
             }
 
             $this->repository->unpinItem($mediatekaItem);
