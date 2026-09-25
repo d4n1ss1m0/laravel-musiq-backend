@@ -45,6 +45,8 @@ use App\Service\PlaylistService\PlaylistService;
 use App\Service\PlaylistService\PlaylistServiceInterface;
 use App\Service\TrackService\TrackService;
 use App\Service\TrackService\TrackServiceInterface;
+use App\Service\YearReviewService\YearReviewService;
+use App\Service\YearReviewService\YearReviewServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -63,6 +65,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MediatekaServiceInterface::class, MediatekaService::class);
         $this->app->bind(HistoryServiceInterface::class, HistoryService::class);
         $this->app->bind(PlaybackServiceInterface::class, PlaybackService::class);
+        $this->app->bind(YearReviewServiceInterface::class, YearReviewService::class);
 
         //Repositories
         $this->app->bind(ArtistRepositoryInterface::class, ArtistRepository::class);

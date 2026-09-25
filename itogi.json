@@ -1,0 +1,242 @@
+{
+    "year": 2026,
+    "userId": 1,
+    "pages": [
+        {
+            "page": 1,
+            "blocks": [
+                {
+                    "type": "title",
+                    "value": "Твои итоги года"
+                },
+                {
+                    "type": "text",
+                    "value": "Мы собрали для тебя несколько итогов. Готов узнать, каким был твой музыкальный год?"
+                }
+            ]
+        },
+        {
+            "page": 2,
+            "blocks": [
+                {
+                    "type": "title",
+                    "value": "Прослушано минут"
+                },
+                {
+                    "type": "text",
+                    "value": "88 888"
+                },
+                {
+                    "type": "text",
+                    "value": "это 61 день!"
+                },
+                {
+                    "type": "text",
+                    "value": "Впечатляющий результат! А теперь узнаем, кто из исполнителей звучал у тебя чаще остальных."
+                }
+            ]
+        },
+        {
+            "page": 3,
+            "blocks": [
+                {
+                    "type": "title",
+                    "value": "Твой любимый исполнитель"
+                },
+                {
+                    "type": "artist",
+                    "value": {
+                        "id": "1234234324",
+                        "cover": "/artist/124343",
+                        "name": "Hatsune Miku"
+                    }
+                },
+                {
+                    "type": "text",
+                    "value": "Прослушано минут"
+                },
+                {
+                    "type": "text",
+                    "value": "2 200"
+                },
+                {
+                    "type": "text",
+                    "value": "Похоже, с этим исполнителем у тебя особый музыкальный коннект."
+                }
+            ]
+        },
+        {
+            "page": 4,
+            "blocks": [
+                {
+                    "type": "title",
+                    "value": "Твой любимые исполнители"
+                },
+                {
+                    "type": "list",
+                    "value": [
+                        {
+                            "type": "artist",
+                            "value": {
+                                "id": "1234234324",
+                                "cover": "/artist/124343",
+                                "name": "Hatsune Miku"
+                            }
+                        },
+                        {
+                            "type": "artist",
+                            "value": {
+                                "id": "1234234324",
+                                "cover": "/artist/124343",
+                                "name": "Kessoku Band"
+                            }
+                        },
+                        {
+                            "type": "artist",
+                            "value": {
+                                "id": "1234234324",
+                                "cover": "/artist/124343",
+                                "name": "King Gnu"
+                            }
+                        },
+                        {
+                            "type": "artist",
+                            "value": {
+                                "id": "1234234324",
+                                "cover": "/artist/124343",
+                                "name": "Кино"
+                            }
+                        },
+                        {
+                            "type": "artist",
+                            "value": {
+                                "id": "1234234324",
+                                "cover": "/artist/124343",
+                                "name": "НТР"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "value": "Отличная подборка! А теперь узнаем, какой трек ты слушал чаще всего."
+                }
+            ]
+        },
+        {
+            "page": 5,
+            "blocks": [
+                {
+                    "type": "title",
+                    "value": "Твой любимый трек"
+                },
+                {
+                    "type": "track",
+                    "value": {
+                        "id": "1234234324",
+                        "cover": "/artist/124343",
+                        "name": "The Vampire",
+                        "artist": "DECO*27"
+                    }
+                },
+                {
+                    "type": "text",
+                    "value": "Главный хит твоего года найден! Ты прослушал его"
+                },
+                {
+                    "type": "text",
+                    "value": "322 раза!"
+                },
+                {
+                    "type": "text",
+                    "value": "Этот трек стал главным саундтреком года. Но он был не один — пора взглянуть на весь твой топ-5."
+                }
+            ]
+        },
+        {
+            "page": 6,
+            "blocks": [
+                {
+                    "type": "title",
+                    "value": "Твой любимые треки"
+                },
+                {
+                    "type": "list",
+                    "value": [
+                        {
+                            "type": "track",
+                            "value": {
+                                "id": "1234234324",
+                                "cover": "/artist/124343",
+                                "name": "The Vampire",
+                                "artist": "DECO*27"
+                            }
+                        },
+                        {
+                            "type": "track",
+                            "value": {
+                                "id": "1234234324",
+                                "cover": "/artist/124343",
+                                "name": "Aerials",
+                                "artist": "System Of A Down"
+                            }
+                        },
+                        {
+                            "type": "track",
+                            "value": {
+                                "id": "1234234324",
+                                "cover": "/artist/124343",
+                                "name": "Язык для славян",
+                                "artist": "НТР"
+                            }
+                        },
+                        {
+                            "type": "track",
+                            "value": {
+                                "id": "1234234324",
+                                "cover": "/artist/124343",
+                                "name": "AIZO",
+                                "artist": "King Gnu"
+                            }
+                        },
+                        {
+                            "type": "track",
+                            "value": {
+                                "id": "1234234324",
+                                "cover": "/artist/124343",
+                                "name": "Rabbit Hole",
+                                "artist": "DECO*27"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "value": "Интересный список! Теперь посмотрим, какой новый трек попал в твои любимые в этом году."
+                }
+            ]
+        },
+        {
+            "page": 7,
+            "blocks": [
+                {
+                    "type": "title",
+                    "value": "В этом году твой новый любимый трек"
+                },
+                {
+                    "type": "track",
+                    "value": {
+                        "id": "1234234324",
+                        "cover": "/artist/124343",
+                        "name": "Aerials",
+                        "artist": "System Of A Down"
+                    }
+                },
+                {
+                    "type": "text",
+                    "value": "Этот трек попал в «Любимые треки» только в этом году, но быстро стал особенным."
+                }
+            ]
+        }
+    ]
+}
