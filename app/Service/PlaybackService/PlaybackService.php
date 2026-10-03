@@ -8,6 +8,7 @@ use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
 use App\Enum\SwitchTrackType;
+use App\Exceptions\NotFoundException;
 use App\Models\PlaybackSession\PlaybackSession;
 use App\Models\PlaybackSession\PlaybackSessionTrack;
 use App\Models\TrackPlaylist;
@@ -113,33 +114,28 @@ class PlaybackService implements PlaybackServiceInterface
     {
         $session = $this->repository->getByUserId($userId);
         if (!$session) {
-            throw new \Exception("Session not found");
+            throw new NotFoundException('Session not found');
         }
 
         if ($session->shuffle == $shuffle) {
             return $session;
         }
 
-        try {
-            DB::beginTransaction();
+        DB::transaction(function () use ($session, $shuffle) {
             $session->shuffle = $shuffle;
 
             $currentTrackPosition = $session->current_position;
-            $currentTrackId = $session->current_track_id;
 
             if ($shuffle) {
-                $this->shuffleTracks($session, $currentTrackPosition, $currentTrackId);
+                $this->shuffleTracks($session, $currentTrackPosition);
             } else {
-                $this->unshuffleTracks($session, $currentTrackPosition, $currentTrackId);
+                $this->unshuffleTracks($session, $currentTrackPosition);
             }
 
             $session->save();
-            DB::commit();
-            $session->load(['source', 'currentTrack', 'sessionTracks.track']);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        });
+
+        $session->load(['source', 'currentTrack', 'sessionTracks.track']);
 
         return $session;
     }
@@ -271,7 +267,7 @@ class PlaybackService implements PlaybackServiceInterface
     {
         $session = $this->repository->getByUserId($userId);
         if (!$session) {
-            throw new \Exception("Session not found");
+            throw new NotFoundException('Session not found');
         }
         $session->repeat_mode = $repeatType;
         $session->save();
@@ -282,7 +278,7 @@ class PlaybackService implements PlaybackServiceInterface
     {
         $session = $this->repository->getByUserId($userId);
         if (!$session) {
-            throw new \Exception("Session not found");
+            throw new NotFoundException('Session not found');
         }
         $session->state = $state;
         $session->save();
