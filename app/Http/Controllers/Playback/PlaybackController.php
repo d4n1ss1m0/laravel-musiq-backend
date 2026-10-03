@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Playback;
 
+use App\DTO\Playback\QueueResponseDTO;
 use App\DTO\Playback\SnapshotDTO;
+use App\Enum\PlaybackManualType;
 use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
+use App\Http\Requests\Playback\AddToQueueRequest;
 use App\Http\Requests\Playback\RepeatRequest;
 use App\Http\Requests\Playback\RequeueRequest;
 use App\Http\Requests\Playback\ShuffleRequest;
@@ -14,6 +17,7 @@ use App\Http\Resources\Playback\PlaybackSessionResource;
 use App\Service\PlaybackService\PlaybackServiceInterface;
 use App\Shared\Fields\Fields;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Utility\PaginateRequest;
 use App\Shared\Traits\HttpResponse;
 use Illuminate\Http\Request;
 
@@ -92,5 +96,33 @@ class PlaybackController extends Controller
         $session = $this->playbackService->changeState(PlaybackState::PAUSED, $userId);
 
         return $this->success(new PlaybackSessionResource($session));
+    }
+
+    public function queue(PaginateRequest $request)
+    {
+        try {
+            $userId = $request->attributes->get(Fields::USER_ID);
+            $perPage = $request->integer(Fields::PER_PAGE, config('app.per_page_default'));
+            [$session, $queue] = $this->playbackService->getQueue($userId, $perPage);
+            $keyValueArray = new QueueResponseDTO($queue, $session);
+            return $this->success($this->paginator($keyValueArray->getResponse(), $queue->total(), $queue->perPage(), $queue->currentPage()));
+        } catch (\Throwable $t) {
+            return $this->error($t->getMessage());
+        }
+    }
+
+    public function add(AddToQueueRequest $request)
+    {
+        try {
+            $userId = $request->attributes->get(Fields::USER_ID);
+            $trackId = $request->input(Fields::ID);
+            $type = $request->input(Fields::TYPE);
+            $type = PlaybackManualType::tryFrom($type);
+
+            $this->playbackService->addToQueue($userId, $type, $trackId);
+            return $this->success('success');
+        } catch (\Throwable $e) {
+            return $this->error($e->getMessage());
+        }
     }
 }

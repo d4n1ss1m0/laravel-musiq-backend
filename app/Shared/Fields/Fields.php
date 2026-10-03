@@ -41,6 +41,7 @@ final class Fields
     public const REPEAT = 'repeatType';
     public const SHUFFLE = 'shuffle';
     public const REQUEUE = 'requeue';
+    public const SESSION = 'session';
 
     private function __construct()
     {

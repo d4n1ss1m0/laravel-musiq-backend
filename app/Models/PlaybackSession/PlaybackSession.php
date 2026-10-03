@@ -82,39 +82,43 @@ class PlaybackSession extends Model
             ->orderBy('position');
     }
 
-    public function nextQueueItem(): ?PlaybackSessionTrack
+    public function nextQueueTrackId() : ?string
     {
-        $tracks = $this->sessionTracks;
-
-        $nextTrack = $tracks
+        $next = PlaybackSessionTrack::query()
+            ->where('session_id', $this->id)
             ->where('playback_position', '>', $this->current_position)
-            ->sortBy('playback_position')
-            ->first();
+            ->orderBy('playback_position')
+            ->join('tracks', 'tracks.id', '=', 'playback_session_tracks.track_id')
+            ->value('tracks.uuid');
 
-        if (!$nextTrack && $this->repeat_mode === RepeatType::QUEUE) {
-            return $tracks
-                ->sortBy('playback_position')
-                ->first();
+        if (!$next && $this->repeat_mode === RepeatType::QUEUE) {
+            return PlaybackSessionTrack::query()
+                ->where('session_id', $this->id)
+                ->orderBy('playback_position')
+                ->join('tracks', 'tracks.id', '=', 'playback_session_tracks.track_id')
+                ->value('tracks.uuid');
         }
 
-        return $nextTrack;
+        return $next;
     }
 
-    public function previousQueueItem(): ?PlaybackSessionTrack
+    public function previousQueueTrackId() : ?string
     {
-        $tracks = $this->sessionTracks;
-
-        $previousTrack = $tracks
+        $prev = PlaybackSessionTrack::query()
+            ->where('session_id', $this->id)
             ->where('playback_position', '<', $this->current_position)
-            ->sortByDesc('playback_position')
-            ->first();
+            ->orderByDesc('playback_position')
+            ->join('tracks', 'tracks.id', '=', 'playback_session_tracks.track_id')
+            ->value('tracks.uuid');
 
-        if (!$previousTrack && $this->repeat_mode === RepeatType::QUEUE) {
-            return $tracks
-                ->sortByDesc('playback_position')
-                ->first();
+        if (!$prev && $this->repeat_mode === RepeatType::QUEUE) {
+            return PlaybackSessionTrack::query()
+                ->where('session_id', $this->id)
+                ->orderByDesc('playback_position')
+                ->join('tracks', 'tracks.id', '=', 'playback_session_tracks.track_id')
+                ->value('tracks.uuid');
         }
 
-        return $previousTrack;
+        return $prev;
     }
 }
