@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\PlaybackSession\PlaybackSessionTrack;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -44,6 +45,11 @@ class Track extends Model
     public function playlists()
     {
         return $this->belongsToMany(Playlist::class, 'track_playlists');
+    }
+
+    public function playbackTrack()
+    {
+        return $this->hasMany(PlaybackSessionTrack::class, 'track_id');
     }
 
 

@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Shared\Support;
+
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class ApiResponse
+{
+    public static function success($value, $status = 'success', $code = 200) {
+        return response()->json([
+            'data' => $value,
+            'status' => $status,
+            'code' => $code
+        ]);
+    }
+
+    public static function error($value, $status = 'error', $code = 500) {
+        if ($code < 200 || $code >= 599) {
+            $code = 500;
+        }
+        return response()->json(['data' => $value,
+            'status' => $status,
+            'code' => $code], $code);
+    }
+
+    public static function musicStream(string $filePath, callable $callback, int $fileSize, ?int $start, ?int $end):StreamedResponse
+    {
+        $response = new StreamedResponse();
+
+        // Устанавливаем заголовки
+        $response->headers->set('Content-Type', 'audio/ogg');
+        $response->headers->set('Content-Disposition', 'inline; filename="' . basename($filePath) . '"');
+        $response->headers->set('Accept-Ranges', 'bytes');
+
+        if(isset($start) && isset($end)) {
+            $response->headers->set('Content-Range', 'bytes ' . $start . '-' . $end . '/' . $fileSize);
+            $response->headers->set('Content-Length', $end - $start + 1);
+            $response->setStatusCode(206); // Устанавливаем статус 206 (Partial Content)
+        } else {
+            $response->headers->set('Content-Length', $fileSize);
+        }
+
+        $response->setCallback($callback);
+
+        return $response;
+    }
+
+    public static function paginator(array $keyValueArray, int $total, int $perPage, int $currentPage) : array
+    {
+        return [
+            ...$keyValueArray,
+            'pagination' => [
+                'total' => $total,
+                'perPage' => $perPage,
+                'currentPage' => $currentPage,
+                'lastPage' => max((int) ceil($total / $perPage), 1),
+            ],
+        ];
+    }
+}

@@ -74,6 +74,29 @@ use OpenApi\Attributes as OA;
     type: 'object',
 )]
 #[OA\Schema(
+    schema: 'PlaybackQueueItem',
+    required: ['track', 'playbackPosition'],
+    properties: [
+        new OA\Property(property: 'track', ref: '#/components/schemas/Track'),
+        new OA\Property(property: 'playbackPosition', type: 'integer', minimum: 1, example: 12),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
+    schema: 'PlaybackQueuePaginatedData',
+    required: ['items', 'session', 'pagination'],
+    properties: [
+        new OA\Property(
+            property: 'items',
+            type: 'array',
+            items: new OA\Items(ref: '#/components/schemas/PlaybackQueueItem'),
+        ),
+        new OA\Property(property: 'session', ref: '#/components/schemas/PlaybackSession'),
+        new OA\Property(property: 'pagination', ref: '#/components/schemas/Pagination'),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
     schema: 'PlaybackSnapshotResponse',
     required: ['data', 'status', 'code'],
     properties: [

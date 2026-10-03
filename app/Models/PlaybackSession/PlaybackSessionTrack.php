@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $track_id
  * @property int $source_position
  * @property int $playback_position
+ * @property string $origin
+ * @property string $placement
  * @property-read PlaybackSession $session
  * @property-read Track $track
  */
@@ -28,6 +30,8 @@ class PlaybackSessionTrack extends Model
         'track_id',
         'source_position',
         'playback_position',
+        'origin',
+        'placement'
     ];
 
     protected $casts = [
