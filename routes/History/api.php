@@ -1,13 +1,14 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\History\HistoryController;
-use Illuminate\Http\Request;
+use App\Http\Middleware\JwtAuthMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('history')
-    ->middleware(\App\Http\Middleware\JwtAuthMiddleware::class)
+    ->middleware(JwtAuthMiddleware::class)
     ->group(function () {
-        Route::post('/', [HistoryController::class, 'store']);
+        Route::post('/', [HistoryController::class, 'store']); // deprecated
+        Route::post('/listen', [HistoryController::class, 'listen']);
+
         Route::get('/', [HistoryController::class, 'get']);
     });
