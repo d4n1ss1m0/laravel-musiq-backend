@@ -355,6 +355,8 @@ class PlaybackService implements PlaybackServiceInterface
                     'source_position' => $nextTrack->source_position,
                     'playback_position' => $nextTrack->playback_position,
                     'track_id' => $track->id,
+                    'origin' => 'manual',
+                    'placement' => $type->value
                 ]);
             } else {
                 $maxSourcePosition = PlaybackSessionTrack::query()
@@ -369,6 +371,8 @@ class PlaybackService implements PlaybackServiceInterface
                     'source_position' => $maxSourcePosition + 1,
                     'playback_position' => $maxPlaybackPosition + 1,
                     'track_id' => $track->id,
+                    'origin' => 'manual',
+                    'placement' => $type->value
                 ]);
             }
         });

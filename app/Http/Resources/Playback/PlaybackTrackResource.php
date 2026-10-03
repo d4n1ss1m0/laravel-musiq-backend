@@ -18,6 +18,7 @@ class PlaybackTrackResource extends JsonResource
         return[
             'track' => new TrackResource($this->resource->track),
             'playbackPosition' => $this->resource->playback_position,
+            'isManual' => $this->resource->origin == 'manual'
         ];
     }
 }

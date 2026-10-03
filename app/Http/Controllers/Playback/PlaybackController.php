@@ -8,6 +8,7 @@ use App\Enum\PlaybackManualType;
 use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
+use App\Http\Requests\Playback\AddToQueueRequest;
 use App\Http\Requests\Playback\RepeatRequest;
 use App\Http\Requests\Playback\RequeueRequest;
 use App\Http\Requests\Playback\ShuffleRequest;
@@ -137,7 +138,7 @@ class PlaybackController extends Controller
         }
     }
 
-    public function add(Request $request)
+    public function add(AddToQueueRequest $request)
     {
         try {
             $userId = $request->attributes->get(Fields::USER_ID);
