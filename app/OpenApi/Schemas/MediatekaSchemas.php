@@ -42,7 +42,10 @@ use OpenApi\Attributes as OA;
                         'id' => '018ff4e6-5d84-7000-8e14-2f6d17c1b9fd',
                         'name' => 'My playlist',
                         'image' => ['/image/playlist/cover.webp'],
-                        'type' => 'public',
+                        'type' => [
+                            'id' => 1,
+                            'name' => 'public',
+                        ],
                     ],
                     'pinPosition' => 1,
                 ],

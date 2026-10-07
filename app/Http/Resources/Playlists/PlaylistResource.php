@@ -48,7 +48,7 @@ class PlaylistResource extends JsonResource
         }
 
 
-        return[
+        $result = [
             'id' => $this->uuid,
             'name' => $this->name,
 //            'image' => $this->image ?'/image/playlist/'.$this->image : '',
@@ -56,9 +56,21 @@ class PlaylistResource extends JsonResource
             'type' => [
                 'id' => $this->playlistType->id,
                 'name' => $this->playlistType->name
-            ],
+            ]
             //'tracks' => TrackResource::collection($this->tracks)
         ];
+
+//        dd(empty($this->tracks_count) , $this->tracks_count != null);
+
+        if ($this->tracks_count) {
+            $result['tracks']['count'] = $this->tracks_count;
+        }
+
+        if ($this->tracks_duration) {
+            $result['tracks']['duration'] = $this->tracks_duration;
+        }
+
+        return $result;
     }
 
 }
