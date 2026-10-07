@@ -30,7 +30,11 @@ class PlaylistService implements PlaylistServiceInterface
     public function getPlaylist(string $playlistId)
     {
         try {
-            return Playlist::query()->where('uuid', $playlistId)->firstOrFail();
+            return Playlist::query()
+                ->withCount('tracks')
+                ->withSum('tracks as tracks_duration', 'time')
+                ->where('uuid', $playlistId)
+                ->firstOrFail();
         } catch (ModelNotFoundException $e) {
             throw new NotFoundException('Playlist not found');
         }
@@ -84,6 +88,7 @@ class PlaylistService implements PlaylistServiceInterface
     {
         $playlist = $this->repository->create($dto->name, $dto->cover, $userId, $dto->type);
         $this->mediatekaRepository->addMedia($playlist, $userId);
+        $playlist = $this->getPlaylist($playlist->uuid);
         return $playlist;
     }
 

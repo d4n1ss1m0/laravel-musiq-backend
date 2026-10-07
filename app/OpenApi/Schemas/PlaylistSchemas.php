@@ -25,6 +25,27 @@ use OpenApi\Attributes as OA;
             ],
             type: 'object',
         ),
+        new OA\Property(
+            property: 'tracks',
+            description: 'Playlist track statistics. Present when aggregate statistics are loaded and contain a non-zero value.',
+            properties: [
+                new OA\Property(
+                    property: 'count',
+                    description: 'Number of tracks. Present when the count is greater than zero.',
+                    type: 'integer',
+                    minimum: 1,
+                    example: 12,
+                ),
+                new OA\Property(
+                    property: 'duration',
+                    description: 'Total duration in seconds. Present when the duration is greater than zero.',
+                    type: 'integer',
+                    minimum: 1,
+                    example: 2688,
+                ),
+            ],
+            type: 'object',
+        ),
     ],
     type: 'object',
 )]
