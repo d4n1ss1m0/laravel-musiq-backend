@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Playlists;
 
+use App\Exceptions\ApiException;
 use App\Http\Resources\ArtistsResource;
 use App\Http\Resources\TrackResource;
 use App\Models\Playlist;
@@ -13,6 +14,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class PlaylistResource extends JsonResource
 {
+    private bool $withTracksStats = false;
     /**
      * Transform the resource into an array.
      *
@@ -51,7 +53,6 @@ class PlaylistResource extends JsonResource
         $result = [
             'id' => $this->uuid,
             'name' => $this->name,
-//            'image' => $this->image ?'/image/playlist/'.$this->image : '',
             'image' => $imagesArray,
             'type' => [
                 'id' => $this->playlistType->id,
@@ -60,17 +61,33 @@ class PlaylistResource extends JsonResource
             //'tracks' => TrackResource::collection($this->tracks)
         ];
 
-//        dd(empty($this->tracks_count) , $this->tracks_count != null);
-
-        if ($this->tracks_count) {
-            $result['tracks']['count'] = $this->tracks_count;
-        }
-
-        if ($this->tracks_duration) {
-            $result['tracks']['duration'] = $this->tracks_duration;
+        if ($this->withTracksStats) {
+            $this->tracksStats($result);
         }
 
         return $result;
+    }
+
+    private function tracksStats(&$result): void
+    {
+        $attributes = $this->resource->getAttributes();
+
+        if (!array_key_exists('tracks_count', $attributes)
+            || !array_key_exists('tracks_duration', $attributes)) {
+            throw new \LogicException('Playlist track statistics were not loaded');
+        }
+
+        $result['tracks'] = [
+            'count' => (int) $this->tracks_count,
+            'duration' => (int) ($this->tracks_duration ?? 0)
+        ];
+    }
+
+    public function withTracksStats()
+    {
+        $this->withTracksStats = true;
+
+        return $this;
     }
 
 }
