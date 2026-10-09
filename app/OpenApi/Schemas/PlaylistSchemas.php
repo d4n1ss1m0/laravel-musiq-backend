@@ -6,7 +6,7 @@ use OpenApi\Attributes as OA;
 
 #[OA\Schema(
     schema: 'Playlist',
-    required: ['id', 'name', 'image', 'type'],
+    required: ['id', 'name', 'image', 'type', 'isOwner'],
     properties: [
         new OA\Property(property: 'id', type: 'string', format: 'uuid', example: '018ff4e6-5d84-7000-8e14-2f6d17c1b9fd'),
         new OA\Property(property: 'name', type: 'string', example: 'My playlist'),
@@ -24,6 +24,12 @@ use OpenApi\Attributes as OA;
                 new OA\Property(property: 'name', type: 'string', enum: ['public', 'private', 'favourite'], example: 'public'),
             ],
             type: 'object',
+        ),
+        new OA\Property(
+            property: 'isOwner',
+            description: 'Whether the authenticated user owns this playlist.',
+            type: 'boolean',
+            example: true,
         ),
         new OA\Property(
             property: 'tracks',
