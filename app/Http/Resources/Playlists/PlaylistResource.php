@@ -7,6 +7,7 @@ use App\Http\Resources\ArtistsResource;
 use App\Http\Resources\TrackResource;
 use App\Models\Playlist;
 use App\Shared\Enums\PlaylistTypes;
+use App\Shared\Fields\Fields;
 use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -49,7 +50,6 @@ class PlaylistResource extends JsonResource
             }
         }
 
-
         $result = [
             'id' => $this->uuid,
             'name' => $this->name,
@@ -57,7 +57,8 @@ class PlaylistResource extends JsonResource
             'type' => [
                 'id' => $this->playlistType->id,
                 'name' => $this->playlistType->name
-            ]
+            ],
+            'isOwner' => (int) $this->user_id === (int) $request->attributes->get(Fields::USER_ID),
             //'tracks' => TrackResource::collection($this->tracks)
         ];
 
