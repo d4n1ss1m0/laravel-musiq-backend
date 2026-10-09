@@ -7,6 +7,19 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Local startup with the SSH database tunnel
+
+Copy `.env.tunnel.example` to `.env.tunnel` and set `SSH_TUNNEL_TARGET` to the SSH user and host that can reach PostgreSQL. The file is ignored by Git.
+
+```bash
+cp .env.tunnel.example .env.tunnel
+make up
+```
+
+`make up` starts the SSH tunnel in the background, then runs `docker compose up -d`. Repeating the command reuses the running tunnel. To close the tunnel, run `make tunnel-stop`.
+
+The default forwarding address is `0.0.0.0:5433`, which is reachable from the Docker container through `host.docker.internal`. This also exposes the forwarded port on every host interface. Set `SSH_TUNNEL_BIND` in `.env.tunnel` if a different bind address works for your Docker setup.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
