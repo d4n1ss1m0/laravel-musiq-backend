@@ -6,7 +6,7 @@ use OpenApi\Attributes as OA;
 
 #[OA\Schema(
     schema: 'Playlist',
-    required: ['id', 'name', 'image', 'type'],
+    required: ['id', 'name', 'image', 'type', 'isOwner'],
     properties: [
         new OA\Property(property: 'id', type: 'string', format: 'uuid', example: '018ff4e6-5d84-7000-8e14-2f6d17c1b9fd'),
         new OA\Property(property: 'name', type: 'string', example: 'My playlist'),
@@ -26,21 +26,28 @@ use OpenApi\Attributes as OA;
             type: 'object',
         ),
         new OA\Property(
+            property: 'isOwner',
+            description: 'Whether the authenticated user owns this playlist.',
+            type: 'boolean',
+            example: true,
+        ),
+        new OA\Property(
             property: 'tracks',
-            description: 'Playlist track statistics. Present when aggregate statistics are loaded and contain a non-zero value.',
+            description: 'Playlist track statistics. Included when requesting or creating a playlist; omitted in playlist lists.',
+            required: ['count', 'duration'],
             properties: [
                 new OA\Property(
                     property: 'count',
-                    description: 'Number of tracks. Present when the count is greater than zero.',
+                    description: 'Number of tracks, including zero for an empty playlist.',
                     type: 'integer',
-                    minimum: 1,
+                    minimum: 0,
                     example: 12,
                 ),
                 new OA\Property(
                     property: 'duration',
-                    description: 'Total duration in seconds. Present when the duration is greater than zero.',
+                    description: 'Total duration in seconds, including zero for an empty playlist.',
                     type: 'integer',
-                    minimum: 1,
+                    minimum: 0,
                     example: 2688,
                 ),
             ],
@@ -50,10 +57,17 @@ use OpenApi\Attributes as OA;
     type: 'object',
 )]
 #[OA\Schema(
+    schema: 'PlaylistWithTrackStats',
+    allOf: [
+        new OA\Schema(ref: '#/components/schemas/Playlist'),
+        new OA\Schema(type: 'object', required: ['tracks']),
+    ],
+)]
+#[OA\Schema(
     schema: 'PlaylistResourceResponse',
     required: ['data', 'status', 'code'],
     properties: [
-        new OA\Property(property: 'data', ref: '#/components/schemas/Playlist'),
+        new OA\Property(property: 'data', ref: '#/components/schemas/PlaylistWithTrackStats'),
         new OA\Property(property: 'status', type: 'string', example: 'success'),
         new OA\Property(property: 'code', type: 'integer', example: 200),
     ],

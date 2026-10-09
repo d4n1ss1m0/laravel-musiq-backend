@@ -46,6 +46,7 @@ use OpenApi\Attributes as OA;
                             'id' => 1,
                             'name' => 'public',
                         ],
+                        'isOwner' => true,
                     ],
                     'pinPosition' => 1,
                 ],
