@@ -127,15 +127,11 @@ class PlaybackController extends Controller
 
     public function move(MoveTrackRequest $request)
     {
-        try {
-            $userId = $request->attributes->get(Fields::USER_ID);
-            $position = $request->integer(Fields::POSITION);
-            $currentPosition = $request->integer(Fields::CURRENT_POSITION);
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $position = $request->integer(Fields::POSITION);
+        $currentPosition = $request->integer(Fields::CURRENT_POSITION);
 
-            $this->playbackService->moveTrack($userId, $currentPosition, $position);
-            return $this->success('success');
-        } catch (\Throwable $e) {
-            return $this->error($e->getMessage());
-        }
+        $this->playbackService->moveTrack($userId, $currentPosition, $position);
+        return $this->success('success');
     }
 }

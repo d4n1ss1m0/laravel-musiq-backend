@@ -281,13 +281,18 @@ class PlaybackPaths
             ),
             new OA\Response(response: 401, description: 'Unauthorized'),
             new OA\Response(
+                response: 404,
+                description: 'Playback session or source queue position not found',
+                content: new OA\JsonContent(ref: '#/components/schemas/ApiErrorResponse'),
+            ),
+            new OA\Response(
                 response: 422,
-                description: 'Missing or non-integer request fields',
-                content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse'),
+                description: 'Missing, non-integer, non-positive, or out-of-range position',
+                content: new OA\JsonContent(ref: '#/components/schemas/PlaybackMoveValidationResponse'),
             ),
             new OA\Response(
                 response: 500,
-                description: 'Session or queue item not found, position outside queue, or queue operation failed',
+                description: 'Unexpected queue operation failure',
                 content: new OA\JsonContent(ref: '#/components/schemas/ApiErrorResponse'),
             ),
         ],

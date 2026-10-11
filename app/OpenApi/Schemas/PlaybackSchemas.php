@@ -95,6 +95,23 @@ use OpenApi\Attributes as OA;
     type: 'object',
 )]
 #[OA\Schema(
+    schema: 'PlaybackMoveValidationResponse',
+    required: ['data', 'status', 'code'],
+    properties: [
+        new OA\Property(
+            property: 'data',
+            type: 'object',
+            additionalProperties: new OA\AdditionalProperties(
+                type: 'array',
+                items: new OA\Items(type: 'string'),
+            ),
+        ),
+        new OA\Property(property: 'status', type: 'string', example: 'error'),
+        new OA\Property(property: 'code', type: 'integer', example: 422),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
     schema: 'PlaybackSourceInfo',
     required: ['sourceType', 'sourceId'],
     properties: [

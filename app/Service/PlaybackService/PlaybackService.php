@@ -19,6 +19,7 @@ use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Repositories\Track\TrackRepositoryInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PlaybackService implements PlaybackServiceInterface
 {
@@ -452,8 +453,18 @@ class PlaybackService implements PlaybackServiceInterface
                 fn ($track) => (int) $track->playback_position === $currentPosition
             );
 
-            if ($fromIndex === false || $position < 1 || $position > $queueTracks->count()) {
-                throw new \InvalidArgumentException('Некорректный трек или позиция');
+            if ($fromIndex === false) {
+                throw new NotFoundException('Track in session not found');
+            }
+
+            if ($position < 1 || $position > $queueTracks->count()) {
+                throw ValidationException::withMessages([
+                    'position' => 'Новая позиция трека должна быть в пределах очереди.',
+                ]);
+            }
+
+            if ($currentPosition === $position) {
+                return $session;
             }
 
             $track = $queueTracks->splice($fromIndex, 1)->first();
