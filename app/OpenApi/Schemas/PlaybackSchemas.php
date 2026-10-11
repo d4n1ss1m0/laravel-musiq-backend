@@ -32,6 +32,19 @@ use OpenApi\Attributes as OA;
     type: 'object',
 )]
 #[OA\Schema(
+    schema: 'PlaybackPlayRequest',
+    properties: [
+        new OA\Property(
+            property: 'placement',
+            description: 'Position of the track in the current playback queue. Omit to resume the current track.',
+            type: 'integer',
+            minimum: 1,
+            example: 2,
+        ),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
     schema: 'PlaybackRepeatRequest',
     required: ['repeatType'],
     properties: [
