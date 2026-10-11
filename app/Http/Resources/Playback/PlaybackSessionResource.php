@@ -21,6 +21,7 @@ class PlaybackSessionResource extends JsonResource
                 'sourceId' => $this->source->uuid
             ],
             'currentTrackId' => $this->currentTrack->uuid,
+            'pausePositionSecond' => $this->pause_position_seconds,
             'currentPosition' => $this->current_position,
             'prev' => $this->previousQueueTrackId(),
             'next' => $this->nextQueueTrackId(),

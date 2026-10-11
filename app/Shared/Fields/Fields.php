@@ -43,6 +43,7 @@ final class Fields
     public const REQUEUE = 'requeue';
     public const SESSION = 'session';
     public const PLACEMENT = 'placement';
+    public const SECONDS = 'seconds';
 
     private function __construct()
     {

@@ -16,7 +16,7 @@ interface PlaybackServiceInterface
     public function previous(int $userId) : PlaybackSession;
     public function repeat(RepeatType $repeatType, int $userId) : PlaybackSession;
     public function play(int $userId, int|null $trackPlacement) : PlaybackSession;
-    public function pause(int $userId) : PlaybackSession;
+    public function pause(int $userId, int $positionSeconds) : PlaybackSession;
     public function getQueue(int $userId, int $perPage) : array;
     public function addToQueue(int $userId, PlaybackManualType $type, string $trackId);
 }

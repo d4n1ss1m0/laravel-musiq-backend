@@ -9,7 +9,7 @@ class PlaybackPaths
     #[OA\Post(
         path: '/playback/snapshot',
         summary: 'Create playback snapshot',
-        description: 'Creates a new playback session for the current user. Existing session is replaced.',
+        description: 'Creates a new playback session for the current user. Existing session is replaced and the saved pause position is null.',
         security: [['tokenAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
@@ -65,7 +65,7 @@ class PlaybackPaths
     #[OA\Post(
         path: '/playback/next',
         summary: 'Switch to next track',
-        description: 'Switches to the next track. At the end of the queue it can finish playback or restart the queue.',
+        description: 'Switches to the next track and clears the saved pause position. At the end of the queue it can finish playback or restart the queue.',
         security: [['tokenAuth' => []]],
         requestBody: new OA\RequestBody(
             required: false,
@@ -93,7 +93,7 @@ class PlaybackPaths
     #[OA\Post(
         path: '/playback/prev',
         summary: 'Switch to previous track',
-        description: 'Switches to the previous track. From the first track it switches to the last track.',
+        description: 'Switches to the previous track and clears the saved pause position. From the first track it switches to the last track.',
         security: [['tokenAuth' => []]],
         tags: ['Playback'],
         responses: [
@@ -139,7 +139,7 @@ class PlaybackPaths
     #[OA\Post(
         path: '/playback/play',
         summary: 'Play current or selected track',
-        description: 'Sets playback state to playing. If placement is provided, selects that position in the current queue before playing.',
+        description: 'Sets playback state to playing and clears the saved pause position. If placement is provided, selects that position in the current queue. To resume after an app restart, first read pausePositionSecond from GET /playback and seek the player before calling play.',
         security: [['tokenAuth' => []]],
         requestBody: new OA\RequestBody(
             required: false,
@@ -186,8 +186,12 @@ class PlaybackPaths
     #[OA\Post(
         path: '/playback/pause',
         summary: 'Set playback state to paused',
-        description: 'Pauses the current track without changing its position in the queue.',
+        description: 'Pauses the current track and saves its position in seconds without changing its position in the queue.',
         security: [['tokenAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/PlaybackPauseRequest'),
+        ),
         tags: ['Playback'],
         responses: [
             new OA\Response(
@@ -201,6 +205,25 @@ class PlaybackPaths
                 description: 'Playback session not found',
                 content: new OA\JsonContent(ref: '#/components/schemas/ApiErrorResponse'),
             ),
+            new OA\Response(
+                response: 422,
+                description: 'Missing, non-integer, or negative seconds',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'data',
+                            type: 'object',
+                            additionalProperties: new OA\AdditionalProperties(
+                                type: 'array',
+                                items: new OA\Items(type: 'string'),
+                            ),
+                        ),
+                        new OA\Property(property: 'status', type: 'string', example: 'error'),
+                        new OA\Property(property: 'code', type: 'integer', example: 422),
+                    ],
+                    type: 'object',
+                ),
+            ),
         ],
     )]
     public function pause(): void
@@ -210,7 +233,7 @@ class PlaybackPaths
     #[OA\Get(
         path: '/playback',
         summary: 'Get playback queue',
-        description: 'Returns the current playback session and a paginated queue for the current user.',
+        description: 'Returns the current playback session, including the saved pause position, and a paginated queue for the current user.',
         security: [['tokenAuth' => []]],
         tags: ['Playback'],
         parameters: [

@@ -45,6 +45,20 @@ use OpenApi\Attributes as OA;
     type: 'object',
 )]
 #[OA\Schema(
+    schema: 'PlaybackPauseRequest',
+    required: ['seconds'],
+    properties: [
+        new OA\Property(
+            property: 'seconds',
+            description: 'Current position in the track, in whole seconds. Zero means the beginning.',
+            type: 'integer',
+            minimum: 0,
+            example: 83,
+        ),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
     schema: 'PlaybackRepeatRequest',
     required: ['repeatType'],
     properties: [
@@ -63,10 +77,18 @@ use OpenApi\Attributes as OA;
 )]
 #[OA\Schema(
     schema: 'PlaybackSession',
-    required: ['source', 'currentTrackId', 'currentPosition', 'prev', 'next', 'shuffle', 'repeatMode', 'state'],
+    required: ['source', 'currentTrackId', 'pausePositionSecond', 'currentPosition', 'prev', 'next', 'shuffle', 'repeatMode', 'state'],
     properties: [
         new OA\Property(property: 'source', ref: '#/components/schemas/PlaybackSourceInfo'),
         new OA\Property(property: 'currentTrackId', type: 'string', format: 'uuid', example: '6654fcfe-cb4f-4c8f-951c-57eb5bde50a1'),
+        new OA\Property(
+            property: 'pausePositionSecond',
+            description: 'Saved pause position in seconds. Null when no position is saved. Read it before calling play to restore the track.',
+            type: 'integer',
+            minimum: 0,
+            nullable: true,
+            example: 83,
+        ),
         new OA\Property(property: 'currentPosition', type: 'integer', minimum: 1, example: 1),
         new OA\Property(property: 'prev', type: 'string', format: 'uuid', nullable: true, example: null),
         new OA\Property(property: 'next', type: 'string', format: 'uuid', nullable: true, example: '6654fcfe-cb4f-4c8f-951c-57eb5bde50a2'),

@@ -9,6 +9,7 @@ use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
 use App\Http\Requests\Playback\AddToQueueRequest;
+use App\Http\Requests\Playback\PauseRequest;
 use App\Http\Requests\Playback\PlayRequest;
 use App\Http\Requests\Playback\RepeatRequest;
 use App\Http\Requests\Playback\RequeueRequest;
@@ -32,15 +33,11 @@ class PlaybackController extends Controller
 
     public function queue(PaginateRequest $request)
     {
-        try {
-            $userId = $request->attributes->get(Fields::USER_ID);
-            $perPage = $request->integer(Fields::PER_PAGE, config('app.per_page_default'));
-            [$session, $queue] = $this->playbackService->getQueue($userId, $perPage);
-            $keyValueArray = new QueueResponseDTO($queue, $session);
-            return $this->success($this->paginator($keyValueArray->getResponse(), $queue->total(), $queue->perPage(), $queue->currentPage()));
-        } catch (\Throwable $t) {
-            return $this->error($t->getMessage());
-        }
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $perPage = $request->integer(Fields::PER_PAGE, config('app.per_page_default'));
+        [$session, $queue] = $this->playbackService->getQueue($userId, $perPage);
+        $keyValueArray = new QueueResponseDTO($queue, $session);
+        return $this->success($this->paginator($keyValueArray->getResponse(), $queue->total(), $queue->perPage(), $queue->currentPage()));
     }
 
     public function snapshot(SnapshotRequest $request)
@@ -103,11 +100,11 @@ class PlaybackController extends Controller
         return $this->success(new PlaybackSessionResource($session));
     }
 
-    public function pause(Request $request)
+    public function pause(PauseRequest $request)
     {
         $userId = $request->attributes->get(Fields::USER_ID);
 
-        $session = $this->playbackService->pause($userId);
+        $session = $this->playbackService->pause($userId, $request->integer(Fields::SECONDS));
 
         return $this->success(new PlaybackSessionResource($session));
     }

@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property bool $shuffle
  * @property RepeatType $repeat_mode
  * @property PlaybackState $state
+ * @property int|null $pause_position_seconds
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User $user
@@ -45,6 +46,7 @@ class PlaybackSession extends Model
         'shuffle',
         'repeat_mode',
         'state',
+        'pause_position_seconds',
     ];
 
     protected $casts = [
