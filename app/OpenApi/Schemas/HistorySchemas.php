@@ -35,7 +35,7 @@ final class HistorySchemas {}
         new OA\Property(property: 'source', description: 'Provide together with sourceId; keep unchanged for this attempt.', type: 'string', nullable: true, enum: ['playlist', 'artist']),
         new OA\Property(property: 'sourceId', description: 'Playlist or artist UUID; provide together with source.', type: 'string', format: 'uuid', nullable: true),
         new OA\Property(property: 'startedAt', description: 'Track start time. Keep unchanged for retries; cannot be in the future.', type: 'string', format: 'date-time', example: '2026-09-25T10:00:00Z'),
-        new OA\Property(property: 'listenedSeconds', description: 'Cumulative seconds of audio actually played in this attempt, not playback position or a delta. Must not exceed track duration.', type: 'integer', minimum: 0, example: 47),
+        new OA\Property(property: 'listenedSeconds', description: 'Cumulative seconds of audio actually played in this attempt, not playback position or a delta. May exceed track duration if a section is replayed.', type: 'integer', minimum: 0, example: 47),
         new OA\Property(property: 'finished', description: 'Set true on the final report after skip, track change, or track end. Later larger reports are still accepted.', type: 'boolean', default: false),
     ],
     type: 'object',
