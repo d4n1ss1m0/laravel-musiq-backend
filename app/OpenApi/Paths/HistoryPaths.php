@@ -50,7 +50,7 @@ class HistoryPaths
             . "2. Count seconds while audio actually plays. Pause counting during pause and seeking; do not use the playback position.\n"
             . "3. Send cumulative listenedSeconds about every 10–15 seconds, and on pause or app background when possible. Retry with the same attemptId and latest cumulative value after network loss.\n"
             . "4. On skip, next, previous, or track end send a final report with finished=true. Start the next play with a new attemptId. A later report with more seconds for a finished attempt is accepted.\n"
-            . "The server credits only the increase for each attempt. listenedSeconds cannot exceed the track duration. These seconds are for listening totals, not resume position.",
+            . "The server credits only the increase for each attempt. listenedSeconds may exceed the track duration when a section is replayed. These seconds are for listening totals, not resume position.",
         security: [['tokenAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
@@ -80,7 +80,7 @@ class HistoryPaths
             ),
             new OA\Response(
                 response: 422,
-                description: 'Validation error or listened seconds exceed track duration',
+                description: 'Validation error',
                 content: new OA\JsonContent(ref: '#/components/schemas/HistoryValidationErrorResponse'),
             ),
         ],

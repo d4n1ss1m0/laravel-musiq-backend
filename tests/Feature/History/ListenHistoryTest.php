@@ -58,7 +58,7 @@ class ListenHistoryTest extends TestCase
         });
     }
 
-    public function test_later_progress_is_credited_after_attempt_was_finished(): void
+    public function test_progress_beyond_track_duration_is_credited_after_attempt_was_finished(): void
     {
         DB::table('users')->insert(['id' => 1]);
 
@@ -93,7 +93,7 @@ class ListenHistoryTest extends TestCase
             source: null,
             sourceId: null,
             startedAt: $startedAt,
-            listenedSeconds: 40,
+            listenedSeconds: 170,
             finished: true,
         ));
 
@@ -104,16 +104,16 @@ class ListenHistoryTest extends TestCase
             source: null,
             sourceId: null,
             startedAt: $startedAt,
-            listenedSeconds: 50,
+            listenedSeconds: 200,
         ));
 
-        $this->assertSame(10, $result['creditedSeconds']);
-        $this->assertSame(50, $result['attemptListenedSeconds']);
-        $this->assertSame(50, $result['listenedSeconds']);
+        $this->assertSame(30, $result['creditedSeconds']);
+        $this->assertSame(200, $result['attemptListenedSeconds']);
+        $this->assertSame(200, $result['listenedSeconds']);
         $this->assertTrue($result['finished']);
         $this->assertDatabaseHas('listening_attempts', [
             'uuid' => $attemptId,
-            'credited_seconds' => 50,
+            'credited_seconds' => 200,
         ]);
     }
 }

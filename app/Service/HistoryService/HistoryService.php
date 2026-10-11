@@ -5,7 +5,6 @@ namespace App\Service\HistoryService;
 use App\DTO\History\HistoryItemDTO;
 use App\DTO\History\ListenHistoryDTO;
 use App\Enum\HistorySource;
-use App\Exceptions\BusinessRuleException;
 use App\Exceptions\ConflictException;
 use App\Exceptions\NotFoundException;
 use App\Http\Resources\Artist\ArtistsResource;
@@ -100,10 +99,6 @@ class HistoryService implements HistoryServiceInterface
 
         if (! $track) {
             throw new NotFoundException('Track not found');
-        }
-
-        if ($track->time > 0 && $dto->listenedSeconds > $track->time) {
-            throw new BusinessRuleException('Listened seconds exceed track duration');
         }
 
         $sourceType = null;
