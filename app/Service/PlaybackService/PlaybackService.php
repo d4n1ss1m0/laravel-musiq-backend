@@ -9,6 +9,7 @@ use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
 use App\Enum\SwitchTrackType;
 use App\Exceptions\NotFoundException;
+use App\Models\Auth\User;
 use App\Models\PlaybackSession\PlaybackSession;
 use App\Models\PlaybackSession\PlaybackSessionTrack;
 use App\Models\TrackPlaylist;
@@ -18,6 +19,7 @@ use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Repositories\Track\TrackRepositoryInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PlaybackService implements PlaybackServiceInterface
 {
@@ -29,6 +31,25 @@ class PlaybackService implements PlaybackServiceInterface
         private readonly PlaybackRepositoryInterface $repository
     )
     {
+    }
+
+    private function lockPlaybackUser(int $userId): void
+    {
+        User::query()->whereKey($userId)->lockForUpdate()->firstOrFail();
+    }
+
+    private function withLockedSession(int $userId, callable $callback): mixed
+    {
+        return DB::transaction(function () use ($userId, $callback) {
+            $this->lockPlaybackUser($userId);
+
+            $session = $this->repository->getByUserId($userId);
+            if (!$session) {
+                throw new NotFoundException('Session not found');
+            }
+
+            return $callback($session);
+        });
     }
 
     public function snapshot(SnapshotDTO $dto, int $userId) : PlaybackSession
@@ -43,25 +64,28 @@ class PlaybackService implements PlaybackServiceInterface
 
         $sourceDbId = $this->getSourceDbId($dto->source, $dto->sourceId);
 
-        $session = $this->repository->getByUserId($userId);
+        return DB::transaction(function () use ($dto, $userId, $tracks, $sourceDbId, $currentTrackId, $currentPosition) {
+            $this->lockPlaybackUser($userId);
 
-        if ($session) {
-            $session->delete();
-        }
+            $session = $this->repository->getByUserId($userId);
+            if ($session) {
+                $session->delete();
+            }
 
-        $session = $this->repository->createSession(
-            $dto->source,
-            $sourceDbId,
-            $currentTrackId,
-            $currentPosition,
-            $dto->shuffle,
-            $dto->repeatType,
-            $userId
-        );
+            $session = $this->repository->createSession(
+                $dto->source,
+                $sourceDbId,
+                $currentTrackId,
+                $currentPosition,
+                $dto->shuffle,
+                $dto->repeatType,
+                $userId
+            );
 
-        $this->repository->addSourceTracks($session->id, $tracks);
+            $this->repository->addSourceTracks($session->id, $tracks);
 
-        return $session;
+            return $session;
+        });
     }
 
     private function getTracks(PlaybackSource $type, string $sourceId, string $currentTrackId, bool $shuffle = false)
@@ -113,16 +137,11 @@ class PlaybackService implements PlaybackServiceInterface
 
     public function shuffle(bool $shuffle, int $userId) : PlaybackSession
     {
-        $session = $this->repository->getByUserId($userId);
-        if (!$session) {
-            throw new NotFoundException('Session not found');
-        }
+        return $this->withLockedSession($userId, function (PlaybackSession $session) use ($shuffle) {
+            if ($session->shuffle == $shuffle) {
+                return $session;
+            }
 
-        if ($session->shuffle == $shuffle) {
-            return $session;
-        }
-
-        DB::transaction(function () use ($session, $shuffle) {
             $session->shuffle = $shuffle;
 
             $currentTrackPosition = $session->current_position;
@@ -134,11 +153,10 @@ class PlaybackService implements PlaybackServiceInterface
             }
 
             $session->save();
+            $session->load(['source', 'currentTrack', 'sessionTracks.track']);
+
+            return $session;
         });
-
-        $session->load(['source', 'currentTrack', 'sessionTracks.track']);
-
-        return $session;
     }
 
     private function shuffleTracks(PlaybackSession &$session, int $currentTrackPosition)
@@ -178,11 +196,9 @@ class PlaybackService implements PlaybackServiceInterface
         $tracks = $tracks->values();
 
         DB::transaction(function () use ($session, $tracks) {
-            DB::table('playback_session_tracks')
-                ->where('session_id', $session->id)
-                ->update([
-                    'playback_position' => DB::raw('playback_position + 1000000'),
-                ]);
+            $query = DB::table('playback_session_tracks')->where('session_id', $session->id);
+            $offset = (int) (clone $query)->max('playback_position') + 1;
+            (clone $query)->increment('playback_position', $offset);
 
             $case = 'CASE source_position ';
             $bindings = [];
@@ -211,32 +227,24 @@ class PlaybackService implements PlaybackServiceInterface
 
     public function next(int $userId, bool $requeue) : PlaybackSession
     {
-        $session = $this->repository->getByUserId($userId);
+        return $this->withLockedSession($userId, function (PlaybackSession $session) use ($requeue) {
+            $this->switchTrack($session, SwitchTrackType::NEXT, $requeue);
+            $session = $this->savePausePosition($session, null);
+            $session->save();
 
-        if (!$session) {
-            throw new \Exception("Session not found");
-        }
-
-        $this->switchTrack($session, SwitchTrackType::NEXT, $requeue);
-        $session = $this->savePausePosition($session, null);
-        $session->save();
-
-        return $session;
+            return $session;
+        });
     }
 
     public function previous(int $userId) : PlaybackSession
     {
-        $session = $this->repository->getByUserId($userId);
+        return $this->withLockedSession($userId, function (PlaybackSession $session) {
+            $this->switchTrack($session, SwitchTrackType::PREVIOUS, true);
+            $session = $this->savePausePosition($session, null);
+            $session->save();
 
-        if (!$session) {
-            throw new \Exception("Session not found");
-        }
-
-        $this->switchTrack($session, SwitchTrackType::PREVIOUS, true);
-        $session = $this->savePausePosition($session, null);
-        $session->save();
-
-        return $session;
+            return $session;
+        });
     }
 
     private function switchTrack(PlaybackSession $session, SwitchTrackType $switchType, bool $requeue = false) : PlaybackSession
@@ -279,45 +287,38 @@ class PlaybackService implements PlaybackServiceInterface
 
     public function repeat(RepeatType $repeatType, int $userId) : PlaybackSession
     {
-        $session = $this->repository->getByUserId($userId);
-        if (!$session) {
-            throw new NotFoundException('Session not found');
-        }
-        $session->repeat_mode = $repeatType;
-        $session->save();
-        return $session;
+        return $this->withLockedSession($userId, function (PlaybackSession $session) use ($repeatType) {
+            $session->repeat_mode = $repeatType;
+            $session->save();
+
+            return $session;
+        });
     }
 
     public function play(int $userId, int|null $trackPlacement): PlaybackSession
     {
-        $session = $this->repository->getByUserId($userId);
-        if (!$session) {
-            throw new NotFoundException('Session not found');
-        }
+        return $this->withLockedSession($userId, function (PlaybackSession $session) use ($trackPlacement) {
+            if ($trackPlacement) {
+                $session = $this->changeTrack($trackPlacement, $session);
+            }
 
-        if ($trackPlacement) {
-            $session = $this->changeTrack($trackPlacement, $session);
-        }
+            $session = $this->changeState(PlaybackState::PLAYING, $session);
+            $session = $this->savePausePosition($session, null);
+            $session->save();
 
-        $session = $this->changeState(PlaybackState::PLAYING, $session);
-        $session = $this->savePausePosition($session, null);
-        $session->save();
-
-        return $session;
+            return $session;
+        });
     }
 
     public function pause(int $userId, int $positionSeconds): PlaybackSession
     {
-        $session = $this->repository->getByUserId($userId);
-        if (!$session) {
-            throw new NotFoundException('Session not found');
-        }
+        return $this->withLockedSession($userId, function (PlaybackSession $session) use ($positionSeconds) {
+            $session = $this->savePausePosition($session, $positionSeconds);
+            $session = $this->changeState(PlaybackState::PAUSED, $session);
+            $session->save();
 
-        $session = $this->savePausePosition($session, $positionSeconds);
-        $session = $this->changeState(PlaybackState::PAUSED, $session);
-        $session->save();
-
-        return $session;
+            return $session;
+        });
     }
 
     private function changeState(PlaybackState $state, PlaybackSession $session) : PlaybackSession
@@ -373,10 +374,9 @@ class PlaybackService implements PlaybackServiceInterface
 
     public function addToQueue(int $userId, PlaybackManualType $type, string $trackId)
     {
-        $session = $this->repository->getByUserId($userId);
         $track = $this->trackRepository->getTrackByUuids([$trackId])[0];
 
-        DB::transaction(function () use ($session, $track, $userId, $type, $trackId) {
+        $this->withLockedSession($userId, function (PlaybackSession $session) use ($track, $type) {
             if ($type == PlaybackManualType::NEXT) {
 
                 $nextTrack = PlaybackSessionTrack::query()
@@ -384,34 +384,26 @@ class PlaybackService implements PlaybackServiceInterface
                     ->where('playback_position', $session->current_position + 1)
                     ->first();
 
-                PlaybackSessionTrack::query()
+                $sourcePositionQuery = PlaybackSessionTrack::query()
                     ->where('session_id', $session->id)
-                    ->where('source_position', '>=', $nextTrack->source_position)
-                    ->update([
-                        'source_position' => DB::raw('"source_position" + 100000'),
-                    ]);
+                    ->where('source_position', '>=', $nextTrack->source_position);
+                $sourceOffset = (int) PlaybackSessionTrack::query()
+                    ->where('session_id', $session->id)
+                    ->max('source_position') + 1;
+                (clone $sourcePositionQuery)->increment('source_position', $sourceOffset);
 
-                PlaybackSessionTrack::query()
-                    ->where('session_id', $session->id)
-                    ->where('source_position', '>=', $nextTrack->source_position)
-                    ->update([
-                        'source_position' => DB::raw('"source_position" - 99999'),
-                    ]);
+                (clone $sourcePositionQuery)->decrement('source_position', $sourceOffset - 1);
 
 
-                PlaybackSessionTrack::query()
+                $playbackPositionQuery = PlaybackSessionTrack::query()
                     ->where('session_id', $session->id)
-                    ->where('playback_position', '>=', $nextTrack->playback_position)
-                    ->update([
-                        'playback_position' => DB::raw('"playback_position" + 100000'),
-                    ]);
+                    ->where('playback_position', '>=', $nextTrack->playback_position);
+                $playbackOffset = (int) PlaybackSessionTrack::query()
+                    ->where('session_id', $session->id)
+                    ->max('playback_position') + 1;
+                (clone $playbackPositionQuery)->increment('playback_position', $playbackOffset);
 
-                PlaybackSessionTrack::query()
-                    ->where('session_id', $session->id)
-                    ->where('playback_position', '>=', $nextTrack->playback_position)
-                    ->update([
-                        'playback_position' => DB::raw('"playback_position" - 99999'),
-                    ]);
+                (clone $playbackPositionQuery)->decrement('playback_position', $playbackOffset - 1);
 
 
 
@@ -440,6 +432,63 @@ class PlaybackService implements PlaybackServiceInterface
                     'placement' => $type->value
                 ]);
             }
+        });
+    }
+
+    public function moveTrack(int $userId, int $currentPosition, int $position) : PlaybackSession
+    {
+        return $this->withLockedSession($userId, function (PlaybackSession $session) use ($currentPosition, $position) {
+            $currentTrack = PlaybackSessionTrack::query()
+                ->where('session_id', $session->id)
+                ->where('playback_position', $session->current_position)
+                ->first();
+
+            if (!$currentTrack) {
+                throw new NotFoundException('Track in session not found');
+            }
+
+            $queueTracks = $session->sessionTracks;
+
+            $fromIndex = $queueTracks->search(
+                fn ($track) => (int) $track->playback_position === $currentPosition
+            );
+
+            if ($fromIndex === false) {
+                throw new NotFoundException('Track in session not found');
+            }
+
+            if ($position < 1 || $position > $queueTracks->count()) {
+                throw ValidationException::withMessages([
+                    'position' => 'Новая позиция трека должна быть в пределах очереди.',
+                ]);
+            }
+
+            if ($currentPosition === $position) {
+                return $session;
+            }
+
+            $track = $queueTracks->splice($fromIndex, 1)->first();
+            $queueTracks->splice($position - 1, 0, [$track]);
+
+            $tracks = $queueTracks->values();
+            $this->updatePlaybackPositions($session, $tracks);
+
+            $currentTrack = PlaybackSessionTrack::query()
+                ->where('id', $currentTrack->id)
+                ->first();
+            $session->current_position = $currentTrack->playback_position;
+
+            if (!$session->shuffle) {
+                $query = DB::table('playback_session_tracks')->where('session_id', $session->id);
+                $offset = (int) (clone $query)->max('source_position') + 1;
+                (clone $query)->increment('source_position', $offset);
+
+                (clone $query)->update(['source_position' => DB::raw('playback_position')]);
+            }
+
+            $session->save();
+
+            return $session;
         });
     }
 }

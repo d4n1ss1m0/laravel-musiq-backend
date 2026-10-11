@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests\Playback;
 
-use App\Enum\PlaybackManualType;
 use App\Shared\Fields\Fields;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class MoveTrackRequest extends FormRequest
 {
@@ -25,19 +23,20 @@ class MoveTrackRequest extends FormRequest
     public function rules(): array
     {
         return [
-            Fields::ID => ['required', 'string'],
-            Fields::TYPE => ['required', 'string', Rule::enum(PlaybackManualType::class)],
+            Fields::POSITION => ['required', 'integer', 'min:1'],
+            Fields::CURRENT_POSITION => ['required', 'integer', 'min:1'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            sprintf('%s.required', Fields::ID) => 'Идентификатор трека обязателен для заполнения.',
-            sprintf('%s.string', Fields::ID) => 'Идентификатор трека должен быть строкой.',
-            sprintf('%s.required', Fields::TYPE) => 'Тип добавления в очередь обязателен для заполнения.',
-            sprintf('%s.string', Fields::TYPE) => 'Тип добавления в очередь должен быть строкой.',
-            sprintf('%s.enum', Fields::TYPE) => 'Тип добавления в очередь должен иметь значение next или tail.',
+            sprintf('%s.required', Fields::POSITION) => 'Укажите новую позицию трека.',
+            sprintf('%s.integer', Fields::POSITION) => 'Новая позиция трека должна быть целым числом.',
+            sprintf('%s.min', Fields::POSITION) => 'Новая позиция трека должна быть не меньше 1.',
+            sprintf('%s.required', Fields::CURRENT_POSITION) => 'Укажите текущую позицию трека.',
+            sprintf('%s.integer', Fields::CURRENT_POSITION) => 'Текущая позиция трека должна быть целым числом.',
+            sprintf('%s.min', Fields::CURRENT_POSITION) => 'Текущая позиция трека должна быть не меньше 1.',
         ];
     }
 }
