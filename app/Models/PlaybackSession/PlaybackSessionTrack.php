@@ -21,8 +21,6 @@ class PlaybackSessionTrack extends Model
 {
     use HasFactory;
 
-    public $incrementing = false;
-
     public $timestamps = false;
 
     protected $fillable = [
@@ -49,12 +47,5 @@ class PlaybackSessionTrack extends Model
     public function track(): BelongsTo
     {
         return $this->belongsTo(Track::class);
-    }
-
-    protected function setKeysForSaveQuery($query)
-    {
-        return $query
-            ->where('session_id', $this->getAttribute('session_id'))
-            ->where('source_position', $this->getAttribute('source_position'));
     }
 }

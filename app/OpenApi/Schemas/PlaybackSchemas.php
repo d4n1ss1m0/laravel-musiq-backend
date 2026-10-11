@@ -67,6 +67,34 @@ use OpenApi\Attributes as OA;
     type: 'object',
 )]
 #[OA\Schema(
+    schema: 'PlaybackAddToQueueRequest',
+    required: ['id', 'type'],
+    properties: [
+        new OA\Property(property: 'id', description: 'UUID of the track to add.', type: 'string', format: 'uuid', example: '6654fcfe-cb4f-4c8f-951c-57eb5bde50a1'),
+        new OA\Property(property: 'type', description: 'next inserts immediately after the current track; tail appends to the queue.', type: 'string', enum: ['next', 'tail'], example: 'tail'),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
+    schema: 'PlaybackMoveRequest',
+    required: ['currentPosition', 'position'],
+    properties: [
+        new OA\Property(property: 'currentPosition', description: 'Current playbackPosition of the queue item to move.', type: 'integer', minimum: 1, example: 3),
+        new OA\Property(property: 'position', description: 'Destination position in the queue after moving the item. Must not exceed the queue length.', type: 'integer', minimum: 1, example: 1),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
+    schema: 'PlaybackQueueActionResponse',
+    required: ['data', 'status', 'code'],
+    properties: [
+        new OA\Property(property: 'data', type: 'string', example: 'success'),
+        new OA\Property(property: 'status', type: 'string', example: 'success'),
+        new OA\Property(property: 'code', type: 'integer', example: 200),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
     schema: 'PlaybackSourceInfo',
     required: ['sourceType', 'sourceId'],
     properties: [
@@ -110,10 +138,11 @@ use OpenApi\Attributes as OA;
 )]
 #[OA\Schema(
     schema: 'PlaybackQueueItem',
-    required: ['track', 'playbackPosition'],
+    required: ['track', 'playbackPosition', 'isManual'],
     properties: [
         new OA\Property(property: 'track', ref: '#/components/schemas/Track'),
         new OA\Property(property: 'playbackPosition', type: 'integer', minimum: 1, example: 12),
+        new OA\Property(property: 'isManual', description: 'Whether the track was added manually to the playback queue.', type: 'boolean', example: false),
     ],
     type: 'object',
 )]

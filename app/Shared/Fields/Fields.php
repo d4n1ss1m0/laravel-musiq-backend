@@ -44,6 +44,8 @@ final class Fields
     public const SESSION = 'session';
     public const PLACEMENT = 'placement';
     public const SECONDS = 'seconds';
+    public const POSITION = 'position';
+    public const CURRENT_POSITION = 'currentPosition';
 
     private function __construct()
     {

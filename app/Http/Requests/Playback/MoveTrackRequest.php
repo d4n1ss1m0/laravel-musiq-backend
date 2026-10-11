@@ -25,8 +25,8 @@ class MoveTrackRequest extends FormRequest
     public function rules(): array
     {
         return [
-            Fields::ID => ['required', 'string'],
-            Fields::TYPE => ['required', 'string', Rule::enum(PlaybackManualType::class)],
+            Fields::POSITION => ['required', 'integer'],
+            Fields::CURRENT_POSITION => ['required', 'integer'],
         ];
     }
 

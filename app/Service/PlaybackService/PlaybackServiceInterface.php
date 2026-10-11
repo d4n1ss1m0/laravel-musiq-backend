@@ -19,4 +19,5 @@ interface PlaybackServiceInterface
     public function pause(int $userId, int $positionSeconds) : PlaybackSession;
     public function getQueue(int $userId, int $perPage) : array;
     public function addToQueue(int $userId, PlaybackManualType $type, string $trackId);
+    public function moveTrack(int $userId, int $currentPosition, int $position) : PlaybackSession;
 }

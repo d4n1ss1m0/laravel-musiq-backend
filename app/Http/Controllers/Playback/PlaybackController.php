@@ -9,6 +9,7 @@ use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
 use App\Enum\RepeatType;
 use App\Http\Requests\Playback\AddToQueueRequest;
+use App\Http\Requests\Playback\MoveTrackRequest;
 use App\Http\Requests\Playback\PauseRequest;
 use App\Http\Requests\Playback\PlayRequest;
 use App\Http\Requests\Playback\RepeatRequest;
@@ -124,15 +125,14 @@ class PlaybackController extends Controller
         }
     }
 
-    public function move(AddToQueueRequest $request)
+    public function move(MoveTrackRequest $request)
     {
         try {
             $userId = $request->attributes->get(Fields::USER_ID);
-            $trackId = $request->input(Fields::ID);
-            $type = $request->input(Fields::TYPE);
-            $type = PlaybackManualType::tryFrom($type);
+            $position = $request->integer(Fields::POSITION);
+            $currentPosition = $request->integer(Fields::CURRENT_POSITION);
 
-            $this->playbackService->addToQueue($userId, $type, $trackId);
+            $this->playbackService->moveTrack($userId, $currentPosition, $position);
             return $this->success('success');
         } catch (\Throwable $e) {
             return $this->error($e->getMessage());
