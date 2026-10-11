@@ -60,6 +60,7 @@ class PlaybackService implements PlaybackServiceInterface
         );
 
         $this->repository->addSourceTracks($session->id, $tracks);
+
         return $session;
     }
 
@@ -210,15 +211,20 @@ class PlaybackService implements PlaybackServiceInterface
 
     public function next(int $userId, bool $requeue) : PlaybackSession
     {
-        return $this->switchTrack($userId, SwitchTrackType::NEXT, $requeue);
+        $session = $this->repository->getByUserId($userId);
+
+        if (!$session) {
+            throw new \Exception("Session not found");
+        }
+
+        $this->switchTrack($session, SwitchTrackType::NEXT, $requeue);
+        $session = $this->savePausePosition($session, null);
+        $session->save();
+
+        return $session;
     }
 
     public function previous(int $userId) : PlaybackSession
-    {
-        return $this->switchTrack($userId, SwitchTrackType::PREVIOUS, true);
-    }
-
-    private function switchTrack(int $userId, SwitchTrackType $switchType, bool $requeue = false)
     {
         $session = $this->repository->getByUserId($userId);
 
@@ -226,6 +232,15 @@ class PlaybackService implements PlaybackServiceInterface
             throw new \Exception("Session not found");
         }
 
+        $this->switchTrack($session, SwitchTrackType::PREVIOUS, true);
+        $session = $this->savePausePosition($session, null);
+        $session->save();
+
+        return $session;
+    }
+
+    private function switchTrack(PlaybackSession $session, SwitchTrackType $switchType, bool $requeue = false) : PlaybackSession
+    {
         //Если повтор трек, ничего не двигаем, возращаем текущее
         if ($session->repeat_mode == RepeatType::TRACK) {
             return $session;
@@ -243,7 +258,6 @@ class PlaybackService implements PlaybackServiceInterface
         //Если повтора нет, и нет перезапуска, то завершаем воспроизведение
         if (!$nextTrack && $session->repeat_mode == RepeatType::OFF && !$requeue) {
             $session->state = PlaybackState::FINISHED;
-            $session->save();
             return $session;
         }
 
@@ -259,7 +273,7 @@ class PlaybackService implements PlaybackServiceInterface
 
         $session->current_position = $nextTrack->playback_position;
         $session->current_track_id = $nextTrack->track_id;
-        $session->save();
+
         return $session;
     }
 
@@ -286,18 +300,20 @@ class PlaybackService implements PlaybackServiceInterface
         }
 
         $session = $this->changeState(PlaybackState::PLAYING, $session);
+        $session = $this->savePausePosition($session, null);
         $session->save();
 
         return $session;
     }
 
-    public function pause(int $userId): PlaybackSession
+    public function pause(int $userId, int $positionSeconds): PlaybackSession
     {
         $session = $this->repository->getByUserId($userId);
         if (!$session) {
             throw new NotFoundException('Session not found');
         }
 
+        $session = $this->savePausePosition($session, $positionSeconds);
         $session = $this->changeState(PlaybackState::PAUSED, $session);
         $session->save();
 
@@ -327,6 +343,13 @@ class PlaybackService implements PlaybackServiceInterface
         if ($session->source_type == PlaybackSource::TRACK->getModel()) {
             $session->source_id = $sessionTrack->track_id;
         }
+
+        return $session;
+    }
+
+    private function savePausePosition(PlaybackSession $session, int|null $positionSeconds) : PlaybackSession
+    {
+        $session->pause_position_seconds = $positionSeconds;
 
         return $session;
     }
