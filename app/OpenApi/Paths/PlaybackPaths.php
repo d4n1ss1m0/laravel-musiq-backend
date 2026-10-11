@@ -138,8 +138,13 @@ class PlaybackPaths
 
     #[OA\Post(
         path: '/playback/play',
-        summary: 'Set playback state to playing',
+        summary: 'Play current or selected track',
+        description: 'Sets playback state to playing. If placement is provided, selects that position in the current queue before playing.',
         security: [['tokenAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: false,
+            content: new OA\JsonContent(ref: '#/components/schemas/PlaybackPlayRequest'),
+        ),
         tags: ['Playback'],
         responses: [
             new OA\Response(
@@ -148,6 +153,30 @@ class PlaybackPaths
                 content: new OA\JsonContent(ref: '#/components/schemas/PlaybackSessionResponse'),
             ),
             new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(
+                response: 404,
+                description: 'Playback session or selected queue position not found',
+                content: new OA\JsonContent(ref: '#/components/schemas/ApiErrorResponse'),
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Invalid placement',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'data',
+                            type: 'object',
+                            additionalProperties: new OA\AdditionalProperties(
+                                type: 'array',
+                                items: new OA\Items(type: 'string'),
+                            ),
+                        ),
+                        new OA\Property(property: 'status', type: 'string', example: 'error'),
+                        new OA\Property(property: 'code', type: 'integer', example: 422),
+                    ],
+                    type: 'object',
+                ),
+            ),
         ],
     )]
     public function play(): void
@@ -157,6 +186,7 @@ class PlaybackPaths
     #[OA\Post(
         path: '/playback/pause',
         summary: 'Set playback state to paused',
+        description: 'Pauses the current track without changing its position in the queue.',
         security: [['tokenAuth' => []]],
         tags: ['Playback'],
         responses: [
@@ -166,6 +196,11 @@ class PlaybackPaths
                 content: new OA\JsonContent(ref: '#/components/schemas/PlaybackSessionResponse'),
             ),
             new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(
+                response: 404,
+                description: 'Playback session not found',
+                content: new OA\JsonContent(ref: '#/components/schemas/ApiErrorResponse'),
+            ),
         ],
     )]
     public function pause(): void

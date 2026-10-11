@@ -274,14 +274,60 @@ class PlaybackService implements PlaybackServiceInterface
         return $session;
     }
 
-    public function changeState(PlaybackState $state, int $userId) : PlaybackSession
+    public function play(int $userId, int|null $trackPlacement): PlaybackSession
     {
         $session = $this->repository->getByUserId($userId);
         if (!$session) {
             throw new NotFoundException('Session not found');
         }
-        $session->state = $state;
+
+        if ($trackPlacement) {
+            $session = $this->changeTrack($trackPlacement, $session);
+        }
+
+        $session = $this->changeState(PlaybackState::PLAYING, $session);
         $session->save();
+
+        return $session;
+    }
+
+    public function pause(int $userId): PlaybackSession
+    {
+        $session = $this->repository->getByUserId($userId);
+        if (!$session) {
+            throw new NotFoundException('Session not found');
+        }
+
+        $session = $this->changeState(PlaybackState::PAUSED, $session);
+        $session->save();
+
+        return $session;
+    }
+
+    private function changeState(PlaybackState $state, PlaybackSession $session) : PlaybackSession
+    {
+        $session->state = $state;
+        return $session;
+    }
+
+    private function changeTrack(int $playTrackPlace, PlaybackSession $session) : PlaybackSession
+    {
+        $sessionTrack = PlaybackSessionTrack::query()
+            ->where('session_id', $session->id)
+            ->where('playback_position', $playTrackPlace)
+            ->first();
+
+        if (!$sessionTrack) {
+            throw new NotFoundException('Track in session not found');
+        }
+
+        $session->current_position = $sessionTrack->playback_position;
+        $session->current_track_id = $sessionTrack->track_id;
+
+        if ($session->source_type == PlaybackSource::TRACK->getModel()) {
+            $session->source_id = $sessionTrack->track_id;
+        }
+
         return $session;
     }
 
