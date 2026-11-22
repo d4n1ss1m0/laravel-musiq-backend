@@ -9,6 +9,7 @@ use App\Models\Track;
 use App\Models\TrackPlaylist;
 use App\Repositories\Track\TrackRepositoryInterface;
 use App\Shared\Enums\PlaylistTypes;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -37,12 +38,15 @@ class PlaylistRepository implements PlaylistRepositoryInterface
 
     public function addTracks(int $playlistId, array $tracks = [])
     {
+        $now = Carbon::now();
         $data = [];
         foreach ($tracks as $track) {
             $data[] = [
                 'playlist_id' => $playlistId,
                 'track_id' => $track->id,
-                'order' => $track->order
+                'order' => $track->order,
+                'created_at' => $now,
+                'updated_at' => $now,
             ];
         }
 
