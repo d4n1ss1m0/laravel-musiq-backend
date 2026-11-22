@@ -36,7 +36,7 @@ class PlaylistController extends Controller
     public function getPlaylist(string $playlistId)
     {
         $playlist = $this->playlistService->getPlaylist($playlistId);
-        return $this->success(new PlaylistResource($playlist));
+        return $this->success(PlaylistResource::make($playlist)->withTracksStats());
     }
 
     public function getTracks(string $playlistId, SearchPaginateRequest $request)
@@ -79,7 +79,7 @@ class PlaylistController extends Controller
 
         $playlist = $this->playlistService->createPlaylist($dto, $userId);
 
-        return $this->success(new PlaylistResource($playlist));
+        return $this->success(PlaylistResource::make($playlist)->withTracksStats());
     }
 
     public function addTrack(string $playlistId, AddTrackToPlaylistRequest $request)

@@ -9,11 +9,11 @@ class HistoryItemDTO
 {
 //    public int $id;
     public int $userId;
-    public int $trackId;
-    public string|null $sourceType;
+    public int|string $trackId;
+    public string|HistorySource|null $sourceType;
     public int|null $sourceId;
 
-    public function __construct(int $userId, int $trackId, string|null $sourceType = null, int|null $sourceId = null)
+    public function __construct(int $userId, int|string $trackId, string|null $sourceType = null, int|null $sourceId = null)
     {
         $this->userId = $userId;
         $this->trackId = $trackId;

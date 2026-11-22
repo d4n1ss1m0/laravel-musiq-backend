@@ -12,14 +12,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $track_id
  * @property int $source_position
  * @property int $playback_position
+ * @property string $origin
+ * @property string $placement
  * @property-read PlaybackSession $session
  * @property-read Track $track
  */
 class PlaybackSessionTrack extends Model
 {
     use HasFactory;
-
-    public $incrementing = false;
 
     public $timestamps = false;
 
@@ -28,6 +28,8 @@ class PlaybackSessionTrack extends Model
         'track_id',
         'source_position',
         'playback_position',
+        'origin',
+        'placement'
     ];
 
     protected $casts = [
@@ -45,12 +47,5 @@ class PlaybackSessionTrack extends Model
     public function track(): BelongsTo
     {
         return $this->belongsTo(Track::class);
-    }
-
-    protected function setKeysForSaveQuery($query)
-    {
-        return $query
-            ->where('session_id', $this->getAttribute('session_id'))
-            ->where('source_position', $this->getAttribute('source_position'));
     }
 }

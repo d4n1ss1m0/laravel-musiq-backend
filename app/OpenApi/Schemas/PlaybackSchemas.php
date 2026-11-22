@@ -32,10 +32,82 @@ use OpenApi\Attributes as OA;
     type: 'object',
 )]
 #[OA\Schema(
+    schema: 'PlaybackPlayRequest',
+    properties: [
+        new OA\Property(
+            property: 'placement',
+            description: 'Position of the track in the current playback queue. Omit to resume the current track.',
+            type: 'integer',
+            minimum: 1,
+            example: 2,
+        ),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
+    schema: 'PlaybackPauseRequest',
+    required: ['seconds'],
+    properties: [
+        new OA\Property(
+            property: 'seconds',
+            description: 'Current position in the track, in whole seconds. Zero means the beginning.',
+            type: 'integer',
+            minimum: 0,
+            example: 83,
+        ),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
     schema: 'PlaybackRepeatRequest',
     required: ['repeatType'],
     properties: [
         new OA\Property(property: 'repeatType', type: 'string', enum: ['off', 'track', 'queue'], example: 'queue'),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
+    schema: 'PlaybackAddToQueueRequest',
+    required: ['id', 'type'],
+    properties: [
+        new OA\Property(property: 'id', description: 'UUID of the track to add.', type: 'string', format: 'uuid', example: '6654fcfe-cb4f-4c8f-951c-57eb5bde50a1'),
+        new OA\Property(property: 'type', description: 'next inserts immediately after the current track; tail appends to the queue.', type: 'string', enum: ['next', 'tail'], example: 'tail'),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
+    schema: 'PlaybackMoveRequest',
+    required: ['currentPosition', 'position'],
+    properties: [
+        new OA\Property(property: 'currentPosition', description: 'Current playbackPosition of the queue item to move.', type: 'integer', minimum: 1, example: 3),
+        new OA\Property(property: 'position', description: 'Destination position in the queue after moving the item. Must not exceed the queue length.', type: 'integer', minimum: 1, example: 1),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
+    schema: 'PlaybackQueueActionResponse',
+    required: ['data', 'status', 'code'],
+    properties: [
+        new OA\Property(property: 'data', type: 'string', example: 'success'),
+        new OA\Property(property: 'status', type: 'string', example: 'success'),
+        new OA\Property(property: 'code', type: 'integer', example: 200),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
+    schema: 'PlaybackMoveValidationResponse',
+    required: ['data', 'status', 'code'],
+    properties: [
+        new OA\Property(
+            property: 'data',
+            type: 'object',
+            additionalProperties: new OA\AdditionalProperties(
+                type: 'array',
+                items: new OA\Items(type: 'string'),
+            ),
+        ),
+        new OA\Property(property: 'status', type: 'string', example: 'error'),
+        new OA\Property(property: 'code', type: 'integer', example: 422),
     ],
     type: 'object',
 )]
@@ -50,10 +122,18 @@ use OpenApi\Attributes as OA;
 )]
 #[OA\Schema(
     schema: 'PlaybackSession',
-    required: ['source', 'currentTrackId', 'currentPosition', 'prev', 'next', 'shuffle', 'repeatMode', 'state'],
+    required: ['source', 'currentTrackId', 'pausePositionSecond', 'currentPosition', 'prev', 'next', 'shuffle', 'repeatMode', 'state'],
     properties: [
         new OA\Property(property: 'source', ref: '#/components/schemas/PlaybackSourceInfo'),
         new OA\Property(property: 'currentTrackId', type: 'string', format: 'uuid', example: '6654fcfe-cb4f-4c8f-951c-57eb5bde50a1'),
+        new OA\Property(
+            property: 'pausePositionSecond',
+            description: 'Saved pause position in seconds. Null when no position is saved. Read it before calling play to restore the track.',
+            type: 'integer',
+            minimum: 0,
+            nullable: true,
+            example: 83,
+        ),
         new OA\Property(property: 'currentPosition', type: 'integer', minimum: 1, example: 1),
         new OA\Property(property: 'prev', type: 'string', format: 'uuid', nullable: true, example: null),
         new OA\Property(property: 'next', type: 'string', format: 'uuid', nullable: true, example: '6654fcfe-cb4f-4c8f-951c-57eb5bde50a2'),
@@ -70,6 +150,30 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'data', ref: '#/components/schemas/PlaybackSession'),
         new OA\Property(property: 'status', type: 'string', example: 'success'),
         new OA\Property(property: 'code', type: 'integer', example: 200),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
+    schema: 'PlaybackQueueItem',
+    required: ['track', 'playbackPosition', 'isManual'],
+    properties: [
+        new OA\Property(property: 'track', ref: '#/components/schemas/Track'),
+        new OA\Property(property: 'playbackPosition', type: 'integer', minimum: 1, example: 12),
+        new OA\Property(property: 'isManual', description: 'Whether the track was added manually to the playback queue.', type: 'boolean', example: false),
+    ],
+    type: 'object',
+)]
+#[OA\Schema(
+    schema: 'PlaybackQueuePaginatedData',
+    required: ['items', 'session', 'pagination'],
+    properties: [
+        new OA\Property(
+            property: 'items',
+            type: 'array',
+            items: new OA\Items(ref: '#/components/schemas/PlaybackQueueItem'),
+        ),
+        new OA\Property(property: 'session', ref: '#/components/schemas/PlaybackSession'),
+        new OA\Property(property: 'pagination', ref: '#/components/schemas/Pagination'),
     ],
     type: 'object',
 )]
