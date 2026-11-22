@@ -13,13 +13,13 @@ enum YearReviewBlocks: string
     case ARTIST = 'artist';
     case TRACK = 'track';
 
-    public function getStructure(array $array, YearReviewBlocks $valueType = null)
+    public function getStructure(array $array, ?YearReviewBlocks $valueType = null)
     {
         $return['value'] = $this->artistStructure($array, $valueType);
         return $return;
     }
 
-    private function artistStructure(array $array, YearReviewBlocks $valueType = null)
+    private function artistStructure(array $array, ?YearReviewBlocks $valueType = null)
     {
         $return = [];
         switch ($this) {
