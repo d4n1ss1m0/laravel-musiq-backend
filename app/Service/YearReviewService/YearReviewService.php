@@ -2,30 +2,18 @@
 
 namespace App\Service\YearReviewService;
 
-use App\DTO\Playlist\CreatePlaylistDTO;
-use App\DTO\Playlist\PlaylistTrackDTO;
-use App\DTO\Playlist\UpdatePlaylistDTO;
 use App\DTO\YearReview\YearReviewModuleDTO;
-use App\Exceptions\NotFoundException;
-use App\Models\Playlist;
-use App\Models\Track;
-use App\Models\TrackPlaylist;
-use App\Repositories\Mediateka\MediatekaRepositoryInterface;
-use App\Repositories\Playlist\PlaylistRepositoryInterface;
-use App\Service\FileService\FileServiceInterface;
-use App\Service\PlaylistService\PlaylistServiceInterface;
-use App\Service\TrackService\TrackServiceInterface;
-use App\Shared\Enums\PlaylistTypes;
 use App\Shared\Enums\YearReviewBlocks;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
 
 class YearReviewService implements YearReviewServiceInterface
 {
     private array $config = [];
+
     private array $datasets = [];
+
     private YearReviewModuleDTO $context;
-    private function getDatasets():array
+
+    private function getDatasets(): array
     {
         $dataset = [];
 
@@ -41,7 +29,10 @@ class YearReviewService implements YearReviewServiceInterface
 
     public function generateReview(int $userId, int $year): array
     {
-        $this->config =  config("year_review.{$year}", []);
+        $this->config = config("year_review.{$year}", []);
+        if (! isset($this->config['datasets'], $this->config['pages'])) {
+            throw new \InvalidArgumentException("Year review configuration not found: {$year}");
+        }
         $this->context = new YearReviewModuleDTO(
             $userId,
             $year,
@@ -58,26 +49,30 @@ class YearReviewService implements YearReviewServiceInterface
             $reviewPage = [];
             $reviewPage['page'] = $page['page'];
             $reviewPage['background'] = $page['background'];
+            $reviewPage['blocks'] = [];
 
             foreach ($page['blocks'] as $block) {
-                $reviewPageBlock = $this->handleBlock($block, $userId, $year);
+                $reviewPageBlock = $this->handleBlock($block);
+
+                if ($reviewPageBlock === null) {
+                    continue 2;
+                }
 
                 $reviewPage['blocks'][] = $reviewPageBlock;
             }
 
             $review['pages'][] = $reviewPage;
         }
-        dd($review);
+
         return $review;
     }
 
-    private function handleBlock(array $block, int $userId, int $year) : array
+    private function handleBlock(array $block): ?array
     {
         $reviewPageBlock = [];
         $reviewPageBlock['type'] = ($block['type'])->value;
-        if(isset($block['dataset'])) {
+        if (isset($block['dataset'])) {
             $dataset = $this->datasets[$block['dataset']];
-
 
             $replacements = isset($dataset['value']) && is_array($dataset['value'])
                 ? $dataset['value']
@@ -85,29 +80,20 @@ class YearReviewService implements YearReviewServiceInterface
 
             if (isset($block['index'])) {
                 $replacements = $replacements[$block['index']] ?? null;
-//                dd($replacements);
+            }
+
+            if ($replacements === null || $replacements === []) {
+                return null;
             }
 
             $valueType = $block['valueType'] ?? null;
             $replacements = $block['type']->getStructure($replacements, $valueType);
 
-//            if ($block['type'] == YearReviewBlocks::LIST and $valueType == YearReviewBlocks::TRACK) {
-//                dd($replacements);
-//            }
-
-            if($block['type'] == YearReviewBlocks::ARTIST) {
-//                dd($replacements, $block['value']);
-            }
-
-            if($block['type'] == YearReviewBlocks::TEXT) {
+            if ($block['type'] == YearReviewBlocks::TEXT) {
                 $replacements = isset($replacements['value']) && is_array($replacements['value'])
                     ? $replacements['value']
                     : $replacements;
             }
-
-
-
-
             $reviewPageBlock['value'] = $this->replacePlaceholders(
                 $block['value'] ?? '',
                 $replacements,
@@ -144,6 +130,29 @@ class YearReviewService implements YearReviewServiceInterface
         ) {
             return $result[$matches[1]];
         }
+
+        $value = preg_replace_callback(
+            '/\{([a-zA-Z_][a-zA-Z0-9_]*)\}(\s+)\[([^\[\]|]+)\|([^\[\]|]+)\|([^\[\]|]+)\]/u',
+            static function (array $matches) use ($result): string {
+                $number = $result[$matches[1]] ?? null;
+
+                if (! is_scalar($number) || ! preg_match('/^-?\d+$/', (string) $number)) {
+                    return $matches[0];
+                }
+
+                $lastTwoDigits = abs((int) $number % 100);
+                $lastDigit = $lastTwoDigits % 10;
+                $form = match (true) {
+                    $lastTwoDigits >= 11 && $lastTwoDigits <= 14 => $matches[5],
+                    $lastDigit === 1 => $matches[3],
+                    $lastDigit >= 2 && $lastDigit <= 4 => $matches[4],
+                    default => $matches[5],
+                };
+
+                return '{'.$matches[1].'}'.$matches[2].$form;
+            },
+            $value,
+        );
 
         return preg_replace_callback(
             '/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/',

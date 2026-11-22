@@ -44,7 +44,7 @@ class TopArtistsModule implements YearReviewServiceModuleInterface
             ->orderByDesc('total_seconds')
             ->orderByDesc('play_count')
             ->orderByDesc('unique_tracks')
-            ->limit(5)
+            ->limit($options['limit'] ?? 5)
             ->get();
         $artists->transform(function ($artist) use ($context) {
             return json_decode(json_encode($artist), true);

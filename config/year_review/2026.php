@@ -8,6 +8,7 @@ use App\Service\YearReviewService\modules\TotalMinutesModule;
 
 return [
     'year' => 2026,
+    'available' => '2026-12-25',
     'datasets' => [
         'total_minutes' => [
             'module' => TotalMinutesModule::class,
@@ -123,7 +124,7 @@ return [
             "blocks" => [
                 [
                     "type" => YearReviewBlocks::TITLE,
-                    "value" => "Твой любимые исполнители"
+                    "value" => "Твои любимые исполнители"
                 ],
                 [
                     "type" => YearReviewBlocks::LIST,
@@ -169,7 +170,7 @@ return [
                 [
                     "type" => YearReviewBlocks::TEXT,
                     "dataset" => "top_tracks",
-                    "value" => "{play_count} [раз!|раза!раз!]",
+                    "value" => "{play_count} [раз!|раза!|раз!]",
                     "index" => 0,
                     "calculatable" => true
                 ],
@@ -189,7 +190,7 @@ return [
             "blocks" => [
                 [
                     "type" => YearReviewBlocks::TITLE,
-                    "value" => "Твой любимые треки"
+                    "value" => "Твои любимые треки"
                 ],
                 [
                     "type" => YearReviewBlocks::LIST,
