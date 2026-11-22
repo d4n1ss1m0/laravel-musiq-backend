@@ -49,6 +49,7 @@ class PlayerPaths
     #[OA\Get(
         path: '/track/{uuid}',
         summary: 'Get track',
+        description: 'Returns the track including loudness.integratedLufs (LUFS) and loudness.truePeakDb (dBTP). Measurements can be null when loudness analysis has not been performed.',
         tags: ['Player'],
         parameters: [
             new OA\Parameter(
