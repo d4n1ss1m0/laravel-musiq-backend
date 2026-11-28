@@ -22,6 +22,8 @@ Route::prefix('playlist')->middleware(\App\Http\Middleware\JwtAuthMiddleware::cl
                 //tracks
                 Route::get('/tracks', [\App\Http\Controllers\Playlist\PlaylistController::class, 'getTracks']);
                 Route::get('/queue', [\App\Http\Controllers\Playlist\PlaylistController::class, 'getQueue']);
+
+                Route::patch('/sort', [\App\Http\Controllers\Playlist\PlaylistController::class, 'saveSort']);
             });
 
             Route::middleware([\App\Http\Middleware\CanManagePlaylistMiddleware::class])->group(function () {

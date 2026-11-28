@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Playlist;
 
 use App\DTO\Playlist\CreatePlaylistDTO;
 use App\DTO\Playlist\UpdatePlaylistDTO;
+use App\Enum\PlaylistOrderType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Playlist\AddTrackToFavouriteRequest;
 use App\Http\Requests\Playlist\AddTrackToPlaylistRequest;
@@ -33,9 +34,10 @@ class PlaylistController extends Controller
     {
     }
 
-    public function getPlaylist(string $playlistId)
+    public function getPlaylist(string $playlistId, Request $request)
     {
-        $playlist = $this->playlistService->getPlaylist($playlistId);
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $playlist = $this->playlistService->getPlaylist($playlistId, $userId);
         return $this->success(PlaylistResource::make($playlist)->withTracksStats());
     }
 
@@ -43,8 +45,9 @@ class PlaylistController extends Controller
     {
         $perPage = $request->query(Fields::PER_PAGE, config('app.per_page_default'));
         $query = $request->query(Fields::QUERY);
+        $userId = $request->attributes->get(Fields::USER_ID);
 
-        $tracks = $this->playlistService->getTracks($playlistId, $perPage, $query);
+        $tracks = $this->playlistService->getTracks($playlistId, $userId, $perPage, $query);
         $keyValueArray = [
             Fields::ITEMS => TrackResource::collection($tracks),
         ];
@@ -61,13 +64,13 @@ class PlaylistController extends Controller
 
     public function getQueue(string $playlistId, Request $request)
     {
-        $tracks = $this->playlistService->getQueue($playlistId);
+        $tracks = $this->playlistService->getQueue($playlistId, $request->attributes->get(Fields::USER_ID));
         return $this->success($tracks);
     }
 
     public function create(CreatePlaylistRequest $request)
     {
-        $userId = $request->get('userId');
+        $userId = $request->attributes->get(Fields::USER_ID);
         if ($request->hasFile(Fields::FILE)) {
             $cover = $this->fileService->addFile($request->file(Fields::FILE), 'image/playlist', 'webp');
         }
@@ -148,5 +151,17 @@ class PlaylistController extends Controller
         $this->playlistService->removeFromFavourite($userId, $request->input(Fields::IDS));
 
         return $this->success(['message' => 'Track removed']);
+    }
+
+    public function saveSort(string $playlistId, Request $request)
+    {
+        $userId = $request->attributes->get(Fields::USER_ID);
+        $validated = $request->validate([
+            Fields::ORDER => ['required', \Illuminate\Validation\Rule::enum(PlaylistOrderType::class)],
+        ]);
+        $order = PlaylistOrderType::from($validated[Fields::ORDER]);
+        $this->playlistService->saveSort($userId, $playlistId, $order);
+
+        return $this->success(['message' => 'Order saved']);
     }
 }

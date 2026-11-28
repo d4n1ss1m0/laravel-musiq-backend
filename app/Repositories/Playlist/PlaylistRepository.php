@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Playlist;
 
+use App\Enum\PlaylistOrderType;
 use App\Exceptions\NotFoundException;
 use App\Models\Playlist;
 use App\Models\PlaylistType;
@@ -11,6 +12,7 @@ use App\Repositories\Track\TrackRepositoryInterface;
 use App\Shared\Enums\PlaylistTypes;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -140,13 +142,28 @@ class PlaylistRepository implements PlaylistRepositoryInterface
             ->update($data);
     }
 
-    public function getPlaylistTracks(string $uuid): Collection
+    public function getPlaylistTracks(string $uuid, PlaylistOrderType $order = PlaylistOrderType::POSITION): Builder
     {
-        return Playlist::query()
-            ->where('uuid', $uuid)
-            ->with('tracks', function ($query) {
-                $query->orderBy('track_playlists.order');
-            })
-            ->first()->tracks;
+        $query = Track::query()
+            ->select('tracks.*')
+            ->join('track_playlists', 'track_playlists.track_id', '=', 'tracks.id')
+            ->join('playlists', 'playlists.id', '=', 'track_playlists.playlist_id')
+            ->where('playlists.uuid', $uuid);
+
+        match ($order) {
+            PlaylistOrderType::POSITION => $query->orderBy('track_playlists.order'),
+            PlaylistOrderType::ARTIST => $query->orderBy(
+                DB::table('track_artists')
+                    ->join('artists', 'artists.id', '=', 'track_artists.artist_id')
+                    ->select('artists.name')
+                    ->whereColumn('track_artists.track_id', 'tracks.id')
+                    ->orderBy('track_artists.id')
+                    ->limit(1)
+            ),
+            PlaylistOrderType::TITLE => $query->orderBy('tracks.name'),
+            PlaylistOrderType::ADDED => $query->orderByDesc('track_playlists.created_at'),
+        };
+
+        return $query->orderBy('track_playlists.id', $order === PlaylistOrderType::ADDED ? 'desc' : 'asc');
     }
 }

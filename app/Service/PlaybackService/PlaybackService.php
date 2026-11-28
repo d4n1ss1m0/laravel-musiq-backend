@@ -6,6 +6,7 @@ use App\DTO\Playback\SnapshotDTO;
 use App\Enum\PlaybackManualType;
 use App\Enum\PlaybackSource;
 use App\Enum\PlaybackState;
+use App\Enum\PlaylistOrderType;
 use App\Enum\RepeatType;
 use App\Enum\SwitchTrackType;
 use App\Exceptions\NotFoundException;
@@ -13,10 +14,12 @@ use App\Models\Auth\User;
 use App\Models\PlaybackSession\PlaybackSession;
 use App\Models\PlaybackSession\PlaybackSessionTrack;
 use App\Models\TrackPlaylist;
+use App\Models\UserPlaylistSetting;
 use App\Repositories\Artist\ArtistRepositoryInterface;
 use App\Repositories\Playback\PlaybackRepositoryInterface;
 use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Repositories\Track\TrackRepositoryInterface;
+use App\Shared\Enums\PlaylistTypes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -54,8 +57,11 @@ class PlaybackService implements PlaybackServiceInterface
 
     public function snapshot(SnapshotDTO $dto, int $userId) : PlaybackSession
     {
-        $tracks = $this->getTracks($dto->source, $dto->sourceId, $dto->trackId, $dto->shuffle);
+        $tracks = $this->getTracks($dto->source, $dto->sourceId, $dto->trackId, $userId, $dto->shuffle);
         $currentTrack = $tracks->firstWhere('uuid', $dto->trackId);
+        if (!$currentTrack) {
+            throw ValidationException::withMessages(['id' => 'Трек отсутствует в источнике воспроизведения.']);
+        }
         $currentTrackId = $currentTrack['id'];
         $currentPosition = $currentTrack['position'];
         if ($dto->shuffle) {
@@ -88,10 +94,27 @@ class PlaybackService implements PlaybackServiceInterface
         });
     }
 
-    private function getTracks(PlaybackSource $type, string $sourceId, string $currentTrackId, bool $shuffle = false)
+    private function getTracks(PlaybackSource $type, string $sourceId, string $currentTrackId, int $userId, bool $shuffle = false)
     {
         $tracks = match ($type) {
-            PlaybackSource::PLAYLIST => $this->playlistRepository->getPlaylistTracks($sourceId),
+            PlaybackSource::PLAYLIST => (function () use ($sourceId, $userId) {
+                $playlist = $this->playlistRepository->getByUUID($sourceId);
+
+                if (!$playlist) {
+                    throw new NotFoundException('Playlist not found');
+                }
+
+                if ($playlist->type == PlaylistTypes::FAVOURITE->getId()) {
+                    $sort = PlaylistOrderType::ADDED;
+                } else {
+                    $sort = UserPlaylistSetting::query()
+                        ->where('user_id', $userId)
+                        ->where('playlist_id', $playlist->id)
+                        ->first()?->sort ?? PlaylistOrderType::POSITION;
+                }
+
+                return $this->playlistRepository->getPlaylistTracks($sourceId, $sort)->get();
+            })(),
             PlaybackSource::ARTIST => $this->artistRepository->getTracks($sourceId),
             PlaybackSource::TRACK => $this->trackRepository->getTrackByUuids([$sourceId])
         };
@@ -113,6 +136,9 @@ class PlaybackService implements PlaybackServiceInterface
 
         if ($shuffle) {
             $currentTrack = $tracks->firstWhere('uuid', $currentTrackId);
+            if (!$currentTrack) {
+                throw ValidationException::withMessages(['id' => 'Трек отсутствует в источнике воспроизведения.']);
+            }
             $tracks = $tracks->reject(fn ($track) => $track['uuid'] === $currentTrackId)
                 ->values();
 

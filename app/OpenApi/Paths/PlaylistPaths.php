@@ -6,6 +6,36 @@ use OpenApi\Attributes as OA;
 
 class PlaylistPaths
 {
+    #[OA\Patch(
+        path: '/playlist/{uuid}/sort',
+        summary: 'Save personal playlist sorting preset',
+        description: 'position removes the saved setting. Favourite sorting is fixed to added; changes are rejected. Active playback is unchanged. Reload tracks from page 1 after saving.',
+        security: [['tokenAuth' => []]],
+        tags: ['Playlist'],
+        parameters: [new OA\Parameter(name: 'uuid', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(
+            required: ['order'],
+            properties: [new OA\Property(property: 'order', description: 'Preset with fixed direction: position ASC, first artist ASC, title ASC, added DESC. Direction is not supplied separately.', type: 'string', enum: ['position', 'artist', 'title', 'added'], example: 'added')],
+            type: 'object',
+        )),
+        responses: [
+            new OA\Response(response: 200, description: 'Order saved', content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'data', properties: [new OA\Property(property: 'message', type: 'string', example: 'Order saved')], type: 'object'),
+                    new OA\Property(property: 'status', type: 'string', example: 'success'),
+                    new OA\Property(property: 'code', type: 'integer', example: 200),
+                ],
+                type: 'object',
+            )),
+            new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(response: 404, description: 'Playlist not found or unavailable'),
+            new OA\Response(response: 422, description: 'Invalid preset or fixed favourite sorting'),
+        ],
+    )]
+    public function saveSort(): void
+    {
+    }
+
     #[OA\Get(
         path: '/playlist/{uuid}',
         summary: 'Get playlist',
