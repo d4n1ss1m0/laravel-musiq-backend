@@ -10,6 +10,8 @@ use OpenApi\Attributes as OA;
     properties: [
         new OA\Property(property: 'id', type: 'string', format: 'uuid', example: '018ff4e6-5d84-7000-8e14-2f6d17c1b9fd'),
         new OA\Property(property: 'name', type: 'string', example: 'My playlist'),
+        new OA\Property(property: 'sort', description: 'Effective preset: position ASC, first artist name ASC, track title ASC, or added date DESC. Favourite always uses added. Included for playlist details and creation; omitted in lists.', type: 'string', enum: ['position', 'artist', 'title', 'added'], example: 'added'),
+        new OA\Property(property: 'canChangeSort', description: 'Whether to show the sorting selector. False for favourite, true for other playlists. Included for playlist details and creation; omitted in lists. Computed, not stored.', type: 'boolean', example: false),
         new OA\Property(
             property: 'image',
             type: 'array',
@@ -60,7 +62,7 @@ use OpenApi\Attributes as OA;
     schema: 'PlaylistWithTrackStats',
     allOf: [
         new OA\Schema(ref: '#/components/schemas/Playlist'),
-        new OA\Schema(type: 'object', required: ['tracks']),
+        new OA\Schema(type: 'object', required: ['tracks', 'sort', 'canChangeSort']),
     ],
 )]
 #[OA\Schema(

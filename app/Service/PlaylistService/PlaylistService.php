@@ -5,10 +5,12 @@ namespace App\Service\PlaylistService;
 use App\DTO\Playlist\CreatePlaylistDTO;
 use App\DTO\Playlist\PlaylistTrackDTO;
 use App\DTO\Playlist\UpdatePlaylistDTO;
+use App\Enum\PlaylistOrderType;
 use App\Exceptions\NotFoundException;
 use App\Models\Playlist;
 use App\Models\Track;
 use App\Models\TrackPlaylist;
+use App\Models\UserPlaylistSetting;
 use App\Repositories\Mediateka\MediatekaRepositoryInterface;
 use App\Repositories\Playlist\PlaylistRepositoryInterface;
 use App\Service\FileService\FileServiceInterface;
@@ -16,6 +18,7 @@ use App\Service\TrackService\TrackServiceInterface;
 use App\Shared\Enums\PlaylistTypes;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PlaylistService implements PlaylistServiceInterface
 {
@@ -27,49 +30,67 @@ class PlaylistService implements PlaylistServiceInterface
     {
     }
 
-    public function getPlaylist(string $playlistId)
+    public function getPlaylist(string $playlistId, ?int $userId = null)
     {
         try {
-            return Playlist::query()
+            $playlist = Playlist::query()
                 ->withCount('tracks')
                 ->withSum('tracks as tracks_duration', 'time')
                 ->where('uuid', $playlistId)
                 ->firstOrFail();
+
+            $playlist->sort = $this->resolveSort($playlist, $userId)->value;
+            $playlist->canChangeSort = $playlist->type != PlaylistTypes::FAVOURITE->getId();
+
+            return $playlist;
         } catch (ModelNotFoundException $e) {
             throw new NotFoundException('Playlist not found');
         }
     }
 
-    public function getTracks(string $playlistId, int $perPage = 10, ?string $query = null)
+    public function getTracks(string $playlistId, int $userId, int $perPage = 10, ?string $query = null)
     {
         try {
-            $tracks = Playlist::query()
-                ->where('uuid', $playlistId)
-                ->firstOrFail()
-                ->tracks()
+            $playlist = Playlist::query()->where('uuid', $playlistId)->firstOrFail();
+
+            return $this->repository->getPlaylistTracks($playlistId, $this->resolveSort($playlist, $userId))
                 ->with('artists')
-                ->where('name', 'like', '%' . $query . '%')
-                ->orderByPivot('order')
+                ->where('tracks.name', 'like', '%' . $query . '%')
                 ->paginate($perPage);
-            return $tracks;
         } catch (ModelNotFoundException $e) {
             throw new NotFoundException('Playlist not found');
         }
     }
 
-    public function getQueue(string $playlistId)
+    private function resolveSort(Playlist $playlist, ?int $userId): PlaylistOrderType
     {
-        $this->getPlaylist($playlistId);
-        return TrackPlaylist::query()
-            ->join('tracks', 'tracks.id', '=', 'track_playlists.track_id')
-            ->join('playlists', 'playlists.id', '=', 'track_playlists.playlist_id')
-            ->where('playlists.uuid', $playlistId)
-            ->orderBy('track_playlists.order')
-            ->get([
-                'track_playlists.id as playlist_item_id',
-                'tracks.uuid as track_id',
-                'track_playlists.order as position',
-            ])->toArray();
+        if ($playlist->type == PlaylistTypes::FAVOURITE->getId()) {
+            return PlaylistOrderType::ADDED;
+        }
+
+        if ($userId === null) {
+            return PlaylistOrderType::POSITION;
+        }
+
+        return UserPlaylistSetting::query()
+            ->where('playlist_id', $playlist->id)
+            ->where('user_id', $userId)
+            ->first()?->sort ?? PlaylistOrderType::POSITION;
+    }
+
+    public function getQueue(string $playlistId, int $userId)
+    {
+        $playlist = $this->getPlaylist($playlistId, $userId);
+
+        return $this->repository->getPlaylistTracks($playlistId, PlaylistOrderType::from($playlist->sort))
+            ->select(['track_playlists.id as playlist_item_id', 'tracks.uuid as track_id'])
+            ->get()
+            ->values()
+            ->map(fn ($track, $index) => [
+                'playlist_item_id' => $track->playlist_item_id,
+                'track_id' => $track->track_id,
+                'position' => $index + 1,
+            ])->all();
     }
 
     private function getPlaylistWithAccess($playlistId, $userId)
@@ -88,7 +109,7 @@ class PlaylistService implements PlaylistServiceInterface
     {
         $playlist = $this->repository->create($dto->name, $dto->cover, $userId, $dto->type);
         $this->mediatekaRepository->addMedia($playlist, $userId);
-        $playlist = $this->getPlaylist($playlist->uuid);
+        $playlist = $this->getPlaylist($playlist->uuid, $userId);
         return $playlist;
     }
 
@@ -234,5 +255,31 @@ class PlaylistService implements PlaylistServiceInterface
             throw new NotFoundException('Playlist not found');
         }
         $this->repository->removeTracks($playlistIntId, $trackIds);
+    }
+
+    public function saveSort(int $userId, string $playlistId, PlaylistOrderType $sort): void
+    {
+        $playlist = Playlist::query()
+            ->where('uuid', $playlistId)
+            ->firstOrFail();
+
+        if ($playlist->type == PlaylistTypes::FAVOURITE->getId()) {
+            throw ValidationException::withMessages(['order' => 'Сортировка избранного фиксирована.']);
+        }
+
+        if ($sort === PlaylistOrderType::POSITION) {
+            UserPlaylistSetting::query()
+                ->where('user_id', $userId)
+                ->where('playlist_id', $playlist->id)
+                ->delete();
+
+            return;
+        }
+
+        UserPlaylistSetting::query()->upsert([
+            'user_id' => $userId,
+            'playlist_id' => $playlist->id,
+            'sort' => $sort->value,
+        ], ['user_id', 'playlist_id'], ['sort']);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Repositories\Playlist;
 
 
 
+use App\Enum\PlaylistOrderType;
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\Playlist;
 use App\Shared\Enums\PlaylistTypes;
 use Illuminate\Support\Collection;
@@ -19,5 +21,5 @@ interface PlaylistRepositoryInterface
 
     public function updateOrder(int $playlistId, int $trackId, int $order);
 
-    public function getPlaylistTracks(string $uuid): Collection;
+    public function getPlaylistTracks(string $uuid, PlaylistOrderType $order = PlaylistOrderType::POSITION): Builder;
 }

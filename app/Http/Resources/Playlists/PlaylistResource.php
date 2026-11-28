@@ -59,6 +59,8 @@ class PlaylistResource extends JsonResource
                 'name' => $this->playlistType->name
             ],
             'isOwner' => (int) $this->user_id === (int) $request->attributes->get(Fields::USER_ID),
+            'sort' => $this->whenHas('sort'),
+            'canChangeSort' => $this->whenHas('canChangeSort'),
             //'tracks' => TrackResource::collection($this->tracks)
         ];
 
